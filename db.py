@@ -5,7 +5,7 @@ import config
 
 
 def connection():
-	credentials = credentials()
+	credentials = config.credentials()
 	conn = MySQLdb.connect(host=credentials['host'],
 		user=credentials['user'],
 		passwd=credentials['passwd'],
@@ -30,7 +30,7 @@ def insert(row):
 	conn.commit()
 	conn.close()
 
-
+# NEEDS TO BE CHANGED TO SQL
 def find_tag_id(tag_id):
 	Beacon = Query()
 	beacons_with_tag = locus_data.search(Beacon.tag_id == tag_id)
@@ -62,7 +62,7 @@ def pretty_print(list_of_records):
 
 
 # this is only executed if called explicitly. For debugging purposes only
- if __name__ == '__main__':
+if __name__ == '__main__':
  	convert_to_csv()
  	pretty_print()
 
