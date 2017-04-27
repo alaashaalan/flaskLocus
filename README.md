@@ -19,7 +19,7 @@ Install mysql
 1. Run in installed directory mysql -u root -p
 
 # Create Local Database
-Login using mysql -u root -p
-CREATE DATABASE locus_development;
-USE locus_development;
-CREATE TABLE raw_data (time_stamp DATETIME(6), tag_id VARCHAR(50), gateway_id VARCHAR(50), rssi SMALLINT(10),  raw_packet_content VARCHAR(100));
+1. Login using mysql -u root -p
+2. CREATE DATABASE locus_development;
+3. USE locus_development;
+4. CREATE TABLE raw_data (time_stamp DATETIME(6), tag_id VARCHAR(50), gateway_id VARCHAR(50), rssi SMALLINT(10),  raw_packet_content VARCHAR(100));
