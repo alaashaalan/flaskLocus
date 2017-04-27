@@ -20,10 +20,10 @@ def intake():
 	if processed_message:
 		db.insert(processed_message)
 
-    f = open(log, 'a')
-    f.write(data)  
-    f.close()
-
+	f = open(log, 'a')
+	f.write(data)  
+	f.close()
+	
 	return data
 
 
