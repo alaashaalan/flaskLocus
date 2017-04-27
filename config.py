@@ -1,4 +1,4 @@
-def credentials:
+def credentials():
 
 	host="localhost"
 	user="root"
@@ -6,9 +6,9 @@ def credentials:
 	db="locus_development"
 
 	db_credentials = {
-		'host' : host
-		'user' : user
-		'passwd' : passwd
+		'host' : host,
+		'user' : user,
+		'passwd' : passwd,
 		'db' : db
 	}
 
