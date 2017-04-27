@@ -6,7 +6,7 @@ import datetime
 
 app = Flask(__name__)
 
-
+log = 'log'
 
 @app.route('/') 
 def index():
@@ -17,11 +17,12 @@ def intake():
 	data = request.get_data()
 	data = str(datetime.datetime.now()).split('.')[0]+','+data 
 	processed_message = process_message(data)
-	db.insert(processed_message)
+	if processed_message:
+		db.insert(processed_message)
 
-    #f = open(log, 'a')
-    #f.write(data)  
-    #f.close()
+    f = open(log, 'a')
+    f.write(data)  
+    f.close()
 
 	return data
 
