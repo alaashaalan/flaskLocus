@@ -18,7 +18,7 @@ def intake():
 	data = str(datetime.datetime.now()).split('.')[0]+','+data 
 	processed_message = process_message(data)
 	if processed_message:
-		db.insert(processed_message)
+		db.insert_raw_data(processed_message)
 
 	f = open(log, 'a')
 	f.write(data)  

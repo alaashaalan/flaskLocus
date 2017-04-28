@@ -6,14 +6,13 @@ def rssi_to_meter(rssi): #code works but will need some modification based what 
 	distance = 10**((RSSI_1m - rssi)/20)
 	return distance
 
+# Process raw message and return as dictionary
 def process_message(message):
 	"""
 	take a message string and parse it
 	return: None
 	"""
-	# print(message)
 	message_values = message.split(',')
-	# print(message_values)
 	print message_values
 	if message_values[1] != "$GPRP":  #if this is not a valid message from the gateway, ignore
 		print('ignoring this message')
@@ -21,14 +20,7 @@ def process_message(message):
 	else:
 		# print message_values		
 		processed_message = {'time_stamp': message_values[0],'report_type': message_values[1], 'tag_id': message_values[2], 'gateway_id': message_values[3], 'rssi': message_values[4], 'raw_packet_content': message_values[5]}
-		print processed_message
 	return processed_message
-
-
-
-
-
-
 
 
 
@@ -57,7 +49,7 @@ $GPRP,9801A7E1F444,D897B89C7B2F,-79,02010607FF4C0010020B00"""
 	# process messages
 	for message in messages:
 		processed_message = process_message(message)
-		db.insert(processed_message)
+		db.insert_raw_data(processed_message)
 
 	print(len(locus_data))
 
