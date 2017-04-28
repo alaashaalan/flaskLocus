@@ -3,7 +3,7 @@ import MySQLdb
 import config
 
 
-
+# Returns credentials to connect to database
 def connection():
 	credentials = config.credentials()
 	conn = MySQLdb.connect(host=credentials['host'],
@@ -15,10 +15,9 @@ def connection():
 	
 	return conn, c
 
-
-def insert(row):
+# Inserts data to table raw_data
+def insert_raw_data(row):
 	conn, c = connection();
-	print row
 	insert_statement = (
 		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content)"
 		"VALUES (%s, %s, %s, %s, %s)"
@@ -30,7 +29,7 @@ def insert(row):
 	conn.commit()
 	conn.close()
 
-# NEEDS TO BE CHANGED TO SQL
+# Needs to be updated to SQL
 def find_tag_id(tag_id):
 	Beacon = Query()
 	beacons_with_tag = locus_data.search(Beacon.tag_id == tag_id)
@@ -39,6 +38,7 @@ def find_tag_id(tag_id):
 
 	return beacons_with_tag
 
+# Needs to be updated to SQL
 def convert_to_csv(list_of_records):
  	csv_result = ""
  	for row in list_of_records:
@@ -50,15 +50,11 @@ def convert_to_csv(list_of_records):
 
  	return csv_result
 
-
+# Not sure if this works
 def pretty_print(list_of_records):
  	pp = pprint.PrettyPrinter(indent=4)
  	for row in list_of_records:
  		pp.pprint(row)
-
-
-
-
 
 
 # this is only executed if called explicitly. For debugging purposes only
