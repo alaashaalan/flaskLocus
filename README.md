@@ -12,11 +12,13 @@ Install mysql
   pip install MySQL-python (mac)
   
 # Install MySQL
-1. Install MySQL-serve: sudo apt-get install mysql-server (Linux) or download from MYSQL website (Mac)
+1. Install MySQL-server: sudo apt-get install mysql-server (Linux)
+
+1. Install MySQL: brew install mysql (If brew isnt installed go to brew.sh)
 
 
 # Logging into Database
-1. Run in installed directory mysql -u root -p
+1. Run in installed directory mysql -u root -p (-p for password if it exists
 
 # Create Local Database
 1. Login using mysql -u root -p
