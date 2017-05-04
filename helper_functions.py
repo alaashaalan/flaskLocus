@@ -25,53 +25,6 @@ def process_message(message):
 	return processed_message
 
 
-def perdelta(start, end, delta):
-	"""
-	helper to generate time range
-	"""
-	curr = start
-	while curr < end:
-		yield curr
-		curr += delta
-
-
-def timestamp_matching(start_time, end_time, beacon, gateway_ids):
-	# create a new table
-	conn, c = db.connection();
-
-	drop_statement = (
-		"DROP TABLE IF EXISTS matched_timestamps;")
-	c.execute(drop_statement)
-	c.fetchall()
-
-	create_table_statement = (
-		"CREATE TABLE matched_timestamps (id INT NOT NULL AUTO_INCREMENT, time_stamp DATETIME(6), rssi1 FLOAT, rssi2 FLOAT, rssi3 FLOAT, PRIMARY KEY (id));"
-		)
-	c.execute(create_table_statement)
-	c.fetchall()
-
-	c.execute("SELECT * FROM raw_data;")
-	results = c.fetchall()
-
-	# iterate over all timestamps, look for rssis for the timestamp, add to the new table
-	for timestamp in perdelta(start_time, end_time, timedelta(seconds=1)):
-		rssi1 = db.find_avg_rssi(timestamp, timestamp, beacon, gateway_ids[0])
-		rssi2 = db.find_avg_rssi(timestamp, timestamp, beacon, gateway_ids[1])
-		rssi3 = db.find_avg_rssi(timestamp, timestamp, beacon, gateway_ids[2])
-
-		insert_statement = "INSERT INTO matched_timestamps (time_stamp, rssi1, rssi2, rssi3) VALUES (%s, %s, %s, %s);"
-		data = (str(timestamp), rssi1, rssi2, rssi3)
-
-		c.execute(insert_statement, data)
-		conn.commit()
-	
-	select_statement = ("SELECT * FROM matched_timestamps;")
-	c.execute(select_statement)
-	results = c.fetchall()
-	conn.close()
-	return results
-
-
 
 
 

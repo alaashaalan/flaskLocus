@@ -2,6 +2,7 @@ from flask import Flask, request
 import helper_functions
 import db
 import datetime
+import trilateration_mysql
 
 
 app = Flask(__name__)
@@ -46,5 +47,5 @@ def timestamp_matching():
 	start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
 	end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
 
-	result = helper_functions.timestamp_matching(start_time, end_time, tag_id, gateway_ids)
+	result = trilateration_mysql.timestamp_matching(start_time, end_time, tag_id, gateway_ids)
 	return  str(result)
