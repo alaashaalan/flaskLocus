@@ -56,9 +56,12 @@ def find_avg_rssi(start_time, end_time, beacon, gateway):
 
 
 # Finds specific beacons based on their id from raw_data table
+'''
+TODO: SQL Function input sanitization
+'''
 def find_by_tag_id(table_name, fields, tag_id):
 	database, cursor = connection()
-	query ="SELECT %s FROM %s WHERE tag_id = %s" %(fields, table_name, '%s')
+	query ="SELECT {} FROM {} WHERE tag_id = {}".format(fields, table_name, '%s')
 	cursor.execute(query, [tag_id])
 	records = cursor.fetchall()
 	database.close()
@@ -68,7 +71,7 @@ def find_by_tag_id(table_name, fields, tag_id):
 # Finds all records between a specific time frame for a specific table (STRING INPUTS)
 def find_by_datetime_range(table_name, fields, time_stamp_start, time_stamp_end):
 	database, cursor = connection()
-	query = "SELECT %s FROM %s WHERE time_stamp >= %s AND time_stamp <= %s" % (fields, table_name, '%s', '%s')
+	query = "SELECT {} FROM {} WHERE time_stamp >= {} AND time_stamp <= {}".format(fields, table_name, '%s', '%s')
 	cursor.execute(query, [time_stamp_start, time_stamp_end])
 	records = cursor.fetchall()
 	database.close()
