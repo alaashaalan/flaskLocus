@@ -6,13 +6,9 @@ import json
 import math
 from json import encoder
 from helper_functions import rssi_to_meter
-import csv
-import MySQLdb
-import config
-import pandas as pd
 # from pandas.io import sql  # Not sure if i need this 
-from db import connection
-
+import db
+from datetime import date, datetime, timedelta
 
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
@@ -92,40 +88,53 @@ def get_polygon_center(points):
 	if (num==0): 
 		center.x=0
 		center.y=0
-	else
+	else:
 		center.x /= num
 		center.y /= num
     return center
 
-if __name__ == '__main__' :
+def perdelta(start, end, delta):
+    """
+    helper to generate time range
+    """
+    curr = start
+    while curr < end:
+        yield curr
+        curr += delta
+
+
+def timestamp_matching(start_time, end_time, beacon, gateway_ids):
 
     p1 = point(0.00, 0.00)                       #gateway coordinates here 
-    p2 = point(4.00, 4.00)
-    p3 = point(0.00, 4.00)
-    
-	conn, c = connection();                    # why is there a semi-coln here. 
-    
-   
+    p2 = point(3.53, 3.66)
+    p3 = point(0.00, 7.35)
 
-	row_count =  c.execute('SELECT COUNT(*) FROM raw_data')
-	df = pd.read_sql('SELECT * FROM raw_data', con=conn)
-	
+    # create a new table
+    database, cursor = db.connection();
 
-	conn.close()
-	
+    drop_statement = (
+        "DROP TABLE IF EXISTS matched_timestamps;")
+    cursor.execute(drop_statement)
+    cursor.fetchall()
 
-	#x and y coordinate arrays 
-    locationx=[]
-    locationy=[]
-    distance1=[]
-    distance2=[]
-    distance3=[]
+    create_table_statement = (
+        "CREATE TABLE matched_timestamps (id INT NOT NULL AUTO_INCREMENT, time_stamp DATETIME(6), rssi1 FLOAT, rssi2 FLOAT, rssi3 FLOAT, dist1 FLOAT, dist2 FLOAT, dist3 FLOAT, locx FLOAT, locy FLOAT, PRIMARY KEY (id));"
+        )
+    cursor.execute(create_table_statement)
+    cursor.fetchall()
 
-	
-    for i in range(row_count) : 
-        d1= rssi_to_meter(df.iloc[i,1])
-        d2= rssi_to_meter(df.iloc[i,2])
-        d3= rssi_to_meter(df.iloc[i,3])
+    cursor.execute("SELECT * FROM raw_data;")
+    results = cursor.fetchall()
+
+    # iterate over all timestamps, look for rssis for the timestamp, add to the new table
+    for timestamp in perdelta(start_time, end_time, timedelta(seconds=1)):
+        rssi1 = db.find_avg_rssi(timestamp, timestamp, beacon, gateway_ids[0])
+        rssi2 = db.find_avg_rssi(timestamp, timestamp, beacon, gateway_ids[1])
+        rssi3 = db.find_avg_rssi(timestamp, timestamp, beacon, gateway_ids[2])
+
+        d1= rssi_to_meter(rssi1)
+        d2= rssi_to_meter(rssi2)
+        d3= rssi_to_meter(rssi3)
 
         c1 = circle(p1, d1)                       
         c2 = circle(p2, d2)
@@ -138,20 +147,21 @@ if __name__ == '__main__' :
          if is_contained_in_circles(p, circle_list):
              inner_points.append(p) 
         
-		center = get_polygon_center(inner_points)
-        
-        locationx.append(center.x)
-        locationy.append(center.y)
-		distance1.append(d1)
-		distance2.append(d2)
-		distance3.append(d3)
-		
-    df['distance_1']=distance1
-    df['distance_2']=distance2
-    df['distance_3']=distance3
-    df['location_x']=locationx
-    df['location_y']=locationy
-	
-   # save new data frame to csv 
-    pandas.DataFrame.to_sql
-    df.to_sql(con=conn, name='Table', if_exits='replace', flavor= 'mysql')
+        center = get_polygon_center(inner_points)
+
+        insert_statement = "INSERT INTO matched_timestamps (time_stamp, rssi1, rssi2, rssi3, dist1, dist2, dist3, locx, locy) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+        data = (str(timestamp), rssi1, rssi2, rssi3, d1, d2, d3, center.x, center.y)
+
+        cursor.execute(insert_statement, data)
+        database.commit()
+    
+    select_statement = ("SELECT * FROM matched_timestamps;")
+    cursor.execute(select_statement)
+    results = cursor.fetchall()
+    database.close()
+    return results
+
+
+
+if __name__ == '__main__' :
+    pass
