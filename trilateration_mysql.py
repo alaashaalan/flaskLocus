@@ -110,7 +110,7 @@ def timestamp_matching(start_time, end_time, beacon, gateway_ids):
     p3 = point(0.00, 7.35)
 
     # create a new table
-    connection, cursor = db.connection();
+    database, cursor = db.connection();
 
     drop_statement = (
         "DROP TABLE IF EXISTS matched_timestamps;")
@@ -153,12 +153,12 @@ def timestamp_matching(start_time, end_time, beacon, gateway_ids):
         data = (str(timestamp), rssi1, rssi2, rssi3, d1, d2, d3, center.x, center.y)
 
         cursor.execute(insert_statement, data)
-        connection.commit()
+        database.commit()
     
     select_statement = ("SELECT * FROM matched_timestamps;")
     cursor.execute(select_statement)
     results = cursor.fetchall()
-    connection.close()
+    database.close()
     return results
 
 
