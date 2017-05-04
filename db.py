@@ -94,3 +94,4 @@ def convert_to_csv(list_of_records):
 
 # this is only executed if called explicitly. For debugging purposes only
 if __name__ == '__main__':
+	pass
