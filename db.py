@@ -6,37 +6,57 @@ import config
 # Returns credentials to connect to database
 def connection():
 	credentials = config.credentials()
-	conn = MySQLdb.connect(host=credentials['host'],
+	connection = MySQLdb.connect(host=credentials['host'],
 		user=credentials['user'],
 		passwd=credentials['passwd'],
 		db=credentials['db'])
 
-	c = conn.cursor();
+	cursor = connection.cursor();
 	
-	return conn, c
+	return connection, cursor
 
-# Inserts data to table raw_data
+# Inserts newly collected data to table raw_data
 def insert_raw_data(row):
-	conn, c = connection();
+	connection, cursor = connection();
 	insert_statement = (
 		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content)"
 		"VALUES (%s, %s, %s, %s, %s)"
 		)
 	data = (row['time_stamp'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content'])
 
-	c.execute(insert_statement, data)
+	cursor.execute(insert_statement, data)
 
-	conn.commit()
-	conn.close()
+	connection.commit()
+	connection.close()
 
-# Needs to be updated to SQL
-def find_tag_id(tag_id):
-	Beacon = Query()
-	beacons_with_tag = locus_data.search(Beacon.tag_id == tag_id)
+# Finds specific beacons based on their id from raw_data table
+def find_by_tag_id(table_name, fields, tag_id):
+	connection, cursor = connection();
+	query ="SELECT %s FROM %s WHERE tag_id = %s" %(fields, table_name, '%s')
+	cursor.execute(query, [tag_id])
+	records = cursor.fetchall()
 
-    # for beacon in beacons_with_tag:
+	return records
 
-	return beacons_with_tag
+# Finds all records between a specific time frame for a specific table (STRING INPUTS)
+def find_by_datetime_range(table_name, fields, time_stamp_start, time_stamp_end):
+	connection, cursor = connection();
+	query = "SELECT %s FROM %s WHERE time_stamp >= %s AND time_stamp <= %s" % (fields, table_name, '%s', '%s')
+	cursor.execute(query, [time_stamp_start, time_stamp_end])
+	records = cursor.fetchall()
+
+	return records
+
+
+
+
+
+
+
+
+
+
+
 
 # Needs to be updated to SQL
 def convert_to_csv(list_of_records):
