@@ -35,6 +35,7 @@ def find_by_tag_id(table_name, fields, tag_id):
 	query ="SELECT %s FROM %s WHERE tag_id = %s" %(fields, table_name, '%s')
 	cursor.execute(query, [tag_id])
 	records = cursor.fetchall()
+	connection.close()
 
 	return records
 
@@ -44,18 +45,9 @@ def find_by_datetime_range(table_name, fields, time_stamp_start, time_stamp_end)
 	query = "SELECT %s FROM %s WHERE time_stamp >= %s AND time_stamp <= %s" % (fields, table_name, '%s', '%s')
 	cursor.execute(query, [time_stamp_start, time_stamp_end])
 	records = cursor.fetchall()
+	connection.close()
 
 	return records
-
-
-
-
-
-
-
-
-
-
 
 
 # Needs to be updated to SQL
@@ -70,16 +62,6 @@ def convert_to_csv(list_of_records):
 
  	return csv_result
 
-# Not sure if this works
-def pretty_print(list_of_records):
- 	pp = pprint.PrettyPrinter(indent=4)
- 	for row in list_of_records:
- 		pp.pprint(row)
-
 
 # this is only executed if called explicitly. For debugging purposes only
 if __name__ == '__main__':
- 	convert_to_csv()
- 	pretty_print()
-
- 	print(convert_to_csv_list(find_tag_id('4129B7F0EF39'))) 
