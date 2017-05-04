@@ -110,21 +110,21 @@ def timestamp_matching(start_time, end_time, beacon, gateway_ids):
     p3 = point(0.00, 7.35)
 
     # create a new table
-    conn, c = db.connection();
+    connection, cursor = db.connection();
 
     drop_statement = (
         "DROP TABLE IF EXISTS matched_timestamps;")
-    c.execute(drop_statement)
-    c.fetchall()
+    cursor.execute(drop_statement)
+    cursor.fetchall()
 
     create_table_statement = (
         "CREATE TABLE matched_timestamps (id INT NOT NULL AUTO_INCREMENT, time_stamp DATETIME(6), rssi1 FLOAT, rssi2 FLOAT, rssi3 FLOAT, dist1 FLOAT, dist2 FLOAT, dist3 FLOAT, locx FLOAT, locy FLOAT, PRIMARY KEY (id));"
         )
-    c.execute(create_table_statement)
-    c.fetchall()
+    cursor.execute(create_table_statement)
+    cursor.fetchall()
 
-    c.execute("SELECT * FROM raw_data;")
-    results = c.fetchall()
+    cursor.execute("SELECT * FROM raw_data;")
+    results = cursor.fetchall()
 
     # iterate over all timestamps, look for rssis for the timestamp, add to the new table
     for timestamp in perdelta(start_time, end_time, timedelta(seconds=1)):
@@ -152,13 +152,13 @@ def timestamp_matching(start_time, end_time, beacon, gateway_ids):
         insert_statement = "INSERT INTO matched_timestamps (time_stamp, rssi1, rssi2, rssi3, dist1, dist2, dist3, locx, locy) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
         data = (str(timestamp), rssi1, rssi2, rssi3, d1, d2, d3, center.x, center.y)
 
-        c.execute(insert_statement, data)
-        conn.commit()
+        cursor.execute(insert_statement, data)
+        connection.commit()
     
     select_statement = ("SELECT * FROM matched_timestamps;")
-    c.execute(select_statement)
-    results = c.fetchall()
-    conn.close()
+    cursor.execute(select_statement)
+    results = cursor.fetchall()
+    connection.close()
     return results
 
 

@@ -39,6 +39,9 @@ def login():
 
 @app.route('/timestamp_matching', methods=['GET'])
 def timestamp_matching():
+	"""
+	TODO: this needs to be scheduled somehow. 
+	"""
 	start_time = '2017-04-28 00:45:52'
 	end_time = '2017-04-28 00:51:14'
 	tag_id = "0CF3EE0B0BDD"
