@@ -13,11 +13,11 @@ def connection():
 		passwd=credentials['passwd'],
 		db=credentials['db'])
 
-	cursor = database.cursor();
+	cursor = database.cursor()
 	
 	return database, cursor
 
-# Inserts data to table raw_data
+# Inserts newly collected data to table raw_data
 def insert_raw_data(row):
 	database, cursor = connection()
 	insert_statement = (
@@ -37,7 +37,7 @@ def find_avg_rssi(start_time, end_time, beacon, gateway):
 	time in the following format: '2017-05-01 17:30:20'
 	TODO: should we pass connection and cursor as arguments instead of openning every time?
 	"""
-	database, cursor = connection();
+	database, cursor = connection()
 	select_statement = (
 		"SELECT rssi FROM  raw_data " 
 		"WHERE time_stamp >= %s AND "
@@ -54,14 +54,30 @@ def find_avg_rssi(start_time, end_time, beacon, gateway):
 	database.close()
 	return avg_rssi
 
-# Needs to be updated to SQL
-def find_tag_id(tag_id):
-	Beacon = Query()
-	beacons_with_tag = locus_data.search(Beacon.tag_id == tag_id)
 
-    # for beacon in beacons_with_tag:
+# Finds specific beacons based on their id from raw_data table
+'''
+TODO: SQL Function input sanitization
+'''
+def find_by_tag_id(table_name, fields, tag_id):
+	database, cursor = connection()
+	query ="SELECT {} FROM {} WHERE tag_id = {}".format(fields, table_name, '%s')
+	cursor.execute(query, [tag_id])
+	records = cursor.fetchall()
+	database.close()
 
-	return beacons_with_tag
+	return records
+
+# Finds all records between a specific time frame for a specific table (STRING INPUTS)
+def find_by_datetime_range(table_name, fields, time_stamp_start, time_stamp_end):
+	database, cursor = connection()
+	query = "SELECT {} FROM {} WHERE time_stamp >= {} AND time_stamp <= {}".format(fields, table_name, '%s', '%s')
+	cursor.execute(query, [time_stamp_start, time_stamp_end])
+	records = cursor.fetchall()
+	database.close()
+
+	return records
+
 
 # Needs to be updated to SQL
 def convert_to_csv(list_of_records):
@@ -75,16 +91,7 @@ def convert_to_csv(list_of_records):
 
  	return csv_result
 
-# Not sure if this works
-def pretty_print(list_of_records):
- 	pp = pprint.PrettyPrinter(indent=4)
- 	for row in list_of_records:
- 		pp.pprint(row)
-
 
 # this is only executed if called explicitly. For debugging purposes only
 if __name__ == '__main__':
- 	convert_to_csv()
- 	pretty_print()
-
- 	print(convert_to_csv_list(find_tag_id('4129B7F0EF39'))) 
+	pass
