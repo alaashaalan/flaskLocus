@@ -106,8 +106,8 @@ def perdelta(start, end, delta):
 def timestamp_matching(start_time, end_time, beacon, gateway_ids):
 
     p1 = point(0.00, 0.00)                       #gateway coordinates here 
-    p2 = point(4.00, 4.00)
-    p3 = point(0.00, 4.00)
+    p2 = point(3.53, 3.66)
+    p3 = point(0.00, 7.35)
 
     # create a new table
     conn, c = db.connection();

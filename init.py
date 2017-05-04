@@ -39,10 +39,10 @@ def login():
 
 @app.route('/timestamp_matching', methods=['GET'])
 def timestamp_matching():
-	start_time = '2017-05-01 17:30:20'
-	end_time = '2017-05-01 17:30:25'
-	tag_id = "5826D8AF76AB"
-	gateway_ids = ["1","2","3"]
+	start_time = '2017-04-28 00:45:52'
+	end_time = '2017-04-28 00:51:14'
+	tag_id = "0CF3EE0B0BDD"
+	gateway_ids = ["D897B89C7B2F","FF9AE92EE4C9","CD2DA08685AD"]
 
 	start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
 	end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
