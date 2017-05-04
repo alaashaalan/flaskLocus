@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
 import pprint
 import MySQLdb
 import config
+import numpy as np
 
 
 # Returns credentials to connect to database
@@ -28,6 +30,30 @@ def insert_raw_data(row):
 
 	conn.commit()
 	conn.close()
+
+
+def find_avg_rssi(start_time, end_time, beacon, gateway):
+	"""
+	time in the following format: '2017-05-01 17:30:20'
+	TODO: datetime is currently returned as 'None'. Need to fix
+	TODO: should we pass connection and cursor as arguments instead of openning every time?
+	"""
+	conn, c = connection();
+	select_statement = (
+		"SELECT rssi FROM  raw_data " 
+		"WHERE time_stamp >= %s AND "
+		"time_stamp <= %s AND " 
+		"tag_id = %s AND " 
+		"gateway_id = %s")
+	data = (start_time, end_time, beacon, gateway)
+	c.execute(select_statement, data)
+	rssis = c.fetchall()
+	if len(rssis) == 0:
+		avg_rssi = 0
+	else:
+		avg_rssi = np.average(rssis)
+	conn.close()
+	return avg_rssi
 
 # Needs to be updated to SQL
 def find_tag_id(tag_id):
