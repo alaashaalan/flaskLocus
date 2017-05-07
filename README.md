@@ -7,7 +7,7 @@
 
 
 # Installing Python Dependencies
-Install mysql
+Install mysql>1.2.5
   `sudo apt-get install python-mysqldb` (linux)
   `pip install MySQL-python` (mac)
   
