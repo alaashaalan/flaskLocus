@@ -3,7 +3,7 @@ import math
 import db
 
 def rssi_to_meter(rssi): #code works but will need some modification based what type of string we pass it
-	RSSI_1m = -53.16667  #this value is experimentally measured
+	RSSI_1m = -45.16667  #this value is experimentally measured
 	distance = 10**((RSSI_1m - rssi)/20)
 	return distance
 
