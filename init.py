@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template, url_for, redirect
 import helper_functions
 import db
 import datetime
@@ -9,9 +9,31 @@ app = Flask(__name__)
 
 log = 'log'
 
-@app.route('/') 
+@app.route('/', methods=['GET','POST']) 
 def index():
-	return  'Index Page'
+	state, label = db.get_app_state()
+	print state, label
+	if state == 0:
+		form = render_template('start_app.html', intake=state, label=label)
+	else:
+		form = render_template('stop_app.html', intake=state, label=label)
+	return form
+
+
+@app.route('/startstop', methods=['POST'])
+def startstop():
+	print('start stop')
+	if request.form['button'] == 'start':
+		label = request.form['label']
+		status = 1
+	if request.form['button'] == 'stop':
+		label = None
+		status = 0
+	db.set_app_state(status, label)
+
+	return redirect(url_for('index'))
+
+
 
 @app.route('/intake', methods=['GET','POST'])
 def intake():

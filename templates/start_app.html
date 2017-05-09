@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>Start the app</title>
+        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div id="container">
+            <div class="title">
+                <h1>Start the app</h1>
+            </div>
+            <div class="Status">
+                Current status: <strong>{{intake}}</strong>
+            </div>
+            <div id="content">
+                Current label: <strong>{{label}}</strong>
+                <br>
+            </div>
+
+
+
+            <div id="content">
+                <form method="post" action="{{ url_for('startstop') }}">
+                  <label for="label">New label:</label>
+                  <input type="text" name="label" value={{label}}><br />                 
+                  <input type="submit" name="button" value="start">
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
+ 
