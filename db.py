@@ -19,20 +19,16 @@ def connection():
 
 # Inserts newly collected data to table raw_data
 def insert_raw_data(row):
-	status, label = get_app_state()
-	if status == 0:
-		print "app status is 0"
-	else:
-		database, cursor = connection()
-		insert_statement = (
-			"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, label)"
-			"VALUES (%s, %s, %s, %s, %s, %s)"
-			)
-		data = (row['time_stamp'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content'], row['label'])
+	database, cursor = connection()
+	insert_statement = (
+		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, label)"
+		"VALUES (%s, %s, %s, %s, %s, %s)"
+		)
+	data = (row['time_stamp'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content'], row['label'])
 
-		cursor.execute(insert_statement, data)
-		database.commit()
-		database.close()
+	cursor.execute(insert_statement, data)
+	database.commit()
+	database.close()
 
 
 def find_avg_rssi(start_time, end_time, beacon, gateway):
