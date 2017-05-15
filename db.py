@@ -21,13 +21,12 @@ def connection():
 def insert_raw_data(row):
 	database, cursor = connection()
 	insert_statement = (
-		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content)"
-		"VALUES (%s, %s, %s, %s, %s)"
+		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, label)"
+		"VALUES (%s, %s, %s, %s, %s, %s)"
 		)
-	data = (row['time_stamp'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content'])
+	data = (row['time_stamp'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content'], row['label'])
 
 	cursor.execute(insert_statement, data)
-
 	database.commit()
 	database.close()
 
@@ -90,6 +89,39 @@ def convert_to_csv(list_of_records):
  
 
  	return csv_result
+
+
+def set_app_state(status, label):
+	database, cursor = connection()
+
+	if label == None:
+		update_statement = 	"""
+		   UPDATE app_state
+		   SET status=%s
+		"""
+		cursor.execute(update_statement, [status])
+	else:
+		update_statement = 	"""
+		   UPDATE app_state
+		   SET status=%s, label=%s
+		"""		
+		cursor.execute(update_statement, (status, label))
+	database.commit()
+	database.close()
+
+
+def get_app_state():
+	database, cursor = connection()
+	select_statement = 	"""
+	   SELECT * from app_state
+	"""
+	cursor.execute(select_statement)
+	state = cursor.fetchone()
+	database.close()
+	status = state[0]
+	label = state[1]
+	return status, label
+
 
 
 # this is only executed if called explicitly. For debugging purposes only
