@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template, url_for, redirect
 import helper_functions
 import db
 import datetime
@@ -9,23 +9,47 @@ app = Flask(__name__)
 
 log = 'log'
 
-@app.route('/') 
+@app.route('/', methods=['GET','POST']) 
 def index():
-	return  'Index Page'
+	state, label = db.get_app_state()
+	print state, label
+	if state == 0:
+		form = render_template('start_app.html', intake=state, label=label)
+	else:
+		form = render_template('stop_app.html', intake=state, label=label)
+	return form
+
+
+@app.route('/startstop', methods=['POST'])
+def startstop():
+	print('start stop')
+	if request.form['button'] == 'start':
+		label = request.form['label']
+		status = 1
+	if request.form['button'] == 'stop':
+		label = None
+		status = 0
+	db.set_app_state(status, label)
+
+	return redirect(url_for('index'))
+
+
 
 @app.route('/intake', methods=['GET','POST'])
 def intake():
-	data = request.get_data()
-	data = str(datetime.datetime.now()).split('.')[0]+','+data 
-	processed_message = helper_functions.process_message(data)
-	if processed_message:
-		db.insert_raw_data(processed_message)
+	# read the current app status
+	status, label = db.get_app_state()
 
-	f = open(log, 'a')
-	f.write(data)  
-	f.close()
-	
-	return data
+	if status == 0:
+		response = "app status is 0. Data not processed"
+	else:	
+		data = request.get_data()
+		data = str(datetime.datetime.now()).split('.')[0]+',' + data + ',' + label
+		processed_message = helper_functions.process_message(data)
+		if processed_message:
+			db.insert_raw_data(processed_message)
+		response = data
+	return response
 
 
 @app.route( '/login' , methods=[ 'GET' ,  'POST' ]) 
