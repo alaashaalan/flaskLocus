@@ -37,17 +37,19 @@ def startstop():
 
 @app.route('/intake', methods=['GET','POST'])
 def intake():
-	data = request.get_data()
-	data = str(datetime.datetime.now()).split('.')[0]+','+data 
-	processed_message = helper_functions.process_message(data)
-	if processed_message:
-		db.insert_raw_data(processed_message)
+	# read the current app status
+	status, label = db.get_app_state()
 
-	f = open(log, 'a')
-	f.write(data)  
-	f.close()
-	
-	return data
+	if status == 0:
+		response = "app status is 0. Data not processed"
+	else:	
+		data = request.get_data()
+		data = str(datetime.datetime.now()).split('.')[0]+',' + data + ',' + label
+		processed_message = helper_functions.process_message(data)
+		if processed_message:
+			db.insert_raw_data(processed_message)
+		response = data
+	return response
 
 
 @app.route( '/login' , methods=[ 'GET' ,  'POST' ]) 

@@ -28,7 +28,7 @@ def insert_raw_data(row):
 			"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, label)"
 			"VALUES (%s, %s, %s, %s, %s, %s)"
 			)
-		data = (row['time_stamp'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content'], label)
+		data = (row['time_stamp'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content'], row['label'])
 
 		cursor.execute(insert_statement, data)
 		database.commit()
