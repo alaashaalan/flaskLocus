@@ -30,3 +30,16 @@ curl -d '$GPRP,5826D8AF76AB,D897B89C7B2F,-98,02011A07FF4C0010020B00' http://loca
 2. `CREATE DATABASE locus_development;`
 3. `USE locus_development;`
 4. `CREATE TABLE raw_data (id INT NOT NULL AUTO_INCREMENT, time_stamp DATETIME(6), tag_id VARCHAR(50), gateway_id VARCHAR(50), rssi SMALLINT(10),  raw_packet_content VARCHAR(100) , PRIMARY KEY (id));`
+
+# WIP
+
+Celery and RabbitMQ
+1. pip install celery
+2. brew install rabbitmq
+
+RabbitMQ
+1. Create user credentials
+
+Celery
+1. celery -A init.celery beat
+2. celery -A init.celery worker --loglevel=info
