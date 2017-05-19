@@ -1,5 +1,5 @@
 config.py
 *.pyc
 log
-
+*.db
 .DS_Store

@@ -1,6 +1,8 @@
 from __future__ import division
 import math
 import db
+import trilateration_mysql
+import datetime
 
 def rssi_to_meter(rssi): #code works but will need some modification based what type of string we pass it
 	RSSI_1m = -53.16667  #this value is experimentally measured
@@ -23,8 +25,20 @@ def process_message(message):
 		processed_message = {'time_stamp': message_values[0],'report_type': message_values[1], 'tag_id': message_values[2], 'gateway_id': message_values[3], 'rssi': message_values[4], 'raw_packet_content': message_values[5], 'label': message_values[6]}
 	return processed_message
 
+def timestamp_matching():
+	"""
+	TODO: this needs to be scheduled somehow.
+	"""
+	start_time = datetime.datetime.now() - datetime.timedelta(days=1)
+	end_time = datetime.datetime.now()
+	tag_id = "0CF3EE0B0BDD"
+	gateway_ids = ["D897B89C7B2F","FF9AE92EE4C9","CD2DA08685AD"]
 
+	start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+	end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
 
+	result = trilateration_mysql.timestamp_matching(start_time, end_time, tag_id, gateway_ids)
+	return  str(result)
 
 
 

@@ -2,10 +2,14 @@ from flask import Flask, request, render_template, url_for, redirect
 import helper_functions
 import db
 import datetime
-import trilateration_mysql
+import celery_app
+from config import celery_config
 
 
 app = Flask(__name__)
+
+celery_config(app)
+celery = celery_app.make_celery(app)
 
 log = 'log'
 
@@ -60,19 +64,7 @@ def login():
 		show_the_login_form()
 
 
-
-@app.route('/timestamp_matching', methods=['GET'])
-def timestamp_matching():
-	"""
-	TODO: this needs to be scheduled somehow. 
-	"""
-	start_time = '2017-04-28 00:45:52'
-	end_time = '2017-04-28 00:51:14'
-	tag_id = "0CF3EE0B0BDD"
-	gateway_ids = ["D897B89C7B2F","FF9AE92EE4C9","CD2DA08685AD"]
-
-	start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
-	end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
-
-	result = trilateration_mysql.timestamp_matching(start_time, end_time, tag_id, gateway_ids)
-	return  str(result)
+@celery.task(name='celery_timestamp_matching')
+def celery_timestamp_matching():
+	helper_functions.timestamp_matching()
+	return 'Data Processed successfully on' + str(datetime.datetime.now())
