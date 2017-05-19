@@ -5,7 +5,7 @@ from __future__ import division
 import json
 import math
 from json import encoder
-from helper_functions import rssi_to_meter
+import helper_functions
 # from pandas.io import sql  # Not sure if i need this 
 import db
 from datetime import date, datetime, timedelta
@@ -132,9 +132,9 @@ def timestamp_matching(start_time, end_time, beacon, gateway_ids):
         rssi2 = db.find_avg_rssi(timestamp, timestamp, beacon, gateway_ids[1])
         rssi3 = db.find_avg_rssi(timestamp, timestamp, beacon, gateway_ids[2])
 
-        d1= rssi_to_meter(rssi1)
-        d2= rssi_to_meter(rssi2)
-        d3= rssi_to_meter(rssi3)
+        d1= helper_functions.rssi_to_meter(rssi1)
+        d2= helper_functions.rssi_to_meter(rssi2)
+        d3= helper_functions.rssi_to_meter(rssi3)
 
         c1 = circle(p1, d1)                       
         c2 = circle(p2, d2)
