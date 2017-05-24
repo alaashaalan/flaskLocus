@@ -67,6 +67,15 @@ def find_by_tag_id(table_name, fields, tag_id):
 
 	return records
 
+def find_by_tag_id_gateway_id_date_range(table_name, fields, tag_id, gateway_id, start_time, end_time):
+	database, cursor = connection()
+	query ="SELECT {} FROM {} WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format(fields, table_name, '%s', '%s', '%s', '%s')
+	cursor.execute(query, [tag_id, gateway_id, start_time, end_time])
+	records = cursor.fetchall()
+	database.close()
+
+	return records
+
 # Finds all records between a specific time frame for a specific table (STRING INPUTS)
 def find_by_datetime_range(table_name, fields, time_stamp_start, time_stamp_end):
 	database, cursor = connection()

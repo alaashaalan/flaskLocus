@@ -3,6 +3,7 @@ import helper_functions
 import db
 import datetime
 import celery_app
+import trilateration_mysql
 from config import celery_config
 
 
@@ -64,7 +65,13 @@ def login():
 		show_the_login_form()
 
 
-@celery.task(name='celery_timestamp_matching')
+# @celery.task(name='celery_timestamp_matching')
+@app.route( '/timestamp_matching' , methods=[ 'GET']) 
 def celery_timestamp_matching():
-	helper_functions.timestamp_matching()
+	start_time = datetime.datetime.now() - datetime.timedelta(days=1)
+	end_time = datetime.datetime.now()
+	tag_id = "0CF3EE0B0BDD"
+	gateway_ids = ["D897B89C7B2F","FF9AE92EE4C9","CD2DA08685AD"]
+
+	result = trilateration_mysql.timestamp_matching(start_time, end_time, tag_id, gateway_ids)
 	return 'Data Processed successfully on' + str(datetime.datetime.now())
