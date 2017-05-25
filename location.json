@@ -1,0 +1,25 @@
+{  
+   "name":"test_location",
+   "gateways":[  
+      {  
+         "id":"D897B89C7B2F",
+         "x":0.0,
+         "y":0.0
+      },
+      {  
+         "id":"CD2DA08685AD",
+         "x":0.0,
+         "y":0.0
+      },
+      {  
+         "id":"FF9AE92EE4C9",
+         "x":0.0,
+         "y":0.0
+      }
+   ],
+   "beacons":[  
+      "0CF3EE0B0BDD",
+      "0CF3EE0B08CA",
+      "0117C59B07A4"
+   ]
+}

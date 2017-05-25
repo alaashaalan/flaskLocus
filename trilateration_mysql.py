@@ -1,6 +1,8 @@
 #!/usr/bin/env
 # -*- coding:utf-8 -*-
 
+# from https://github.com/noomrevlis/trilateration
+
 from __future__ import division
 import json
 import math
@@ -161,7 +163,28 @@ def timestamp_matching(start_time, end_time, beacon, gateway_ids):
     database.close()
     return results
 
+def trilateration(points, distances):
+    circle_list = []
+    for point, distance in zip(points, distances):
+        circle_list.append(circle(point, distance))
 
+    inner_points = []
+    for p in get_all_intersecting_points(circle_list):
+        if is_contained_in_circles(p, circle_list):
+            inner_points.append(p) 
+    
+    center = get_polygon_center(inner_points)
+    return center  
 
 if __name__ == '__main__' :
-    pass
+
+    p1 = point(0.81, 1.2)
+    p2 = point(1.21, 0.69)
+    p3 = point(0.87, 0.84)
+
+    c1 = 0.70
+    c2 = 0.51
+    c3 = 0.63
+
+    intersect = trilateration([p1,p2,p3],[c1,c2,c3])
+    print intersect.x, intersect.y
