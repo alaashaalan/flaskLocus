@@ -52,3 +52,16 @@ def timestamp_matching():
 
 	result = trilateration_mysql.timestamp_matching(start_time, end_time, tag_id, gateway_ids)
 	return  str(result)
+
+@app.route('/plot_points', methods=['GET'])
+def plot_points():
+	start_time = '2017-04-28 00:45:52'
+	end_time = '2017-04-28 00:51:14'
+#	tag_id = "0CF3EE0B0BDD"
+
+	start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+	end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+
+#	result = db.plot_points(start_time, end_time, tag_id)
+	result = db.plot_points(start_time, end_time)
+	return 

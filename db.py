@@ -3,7 +3,7 @@ import pprint
 import MySQLdb
 import config
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 # Returns credentials to connect to database
 def connection():
@@ -87,9 +87,27 @@ def convert_to_csv(list_of_records):
  			csv_result += ','.join([row['time_stamp'], row['report_type'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content']]) + '\n'
  		except KeyError, e:
  			csv_result += ','.join(['', row['report_type'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content']]) + '\n'
- 
-
+ 	
  	return csv_result
+
+def plot_points(start_time, end_time):
+	conn, c = connection();
+	select_statement = (
+		"SELECT locx, locy FROM  matched_timestamps " 
+		"WHERE time_stamp >= %s AND "
+		"time_stamp <= %s")
+	data = (start_time, end_time)
+	c.execute(select_statement, data)
+	locations=c.fetchall()
+	conn.close()
+	zip(*locations)
+#	im=plt.imread(image_name)               # NEED TO CHANGE IMAGE TO FILE NAME
+#	implot = plt.imshow(im)
+	plt.scatter(*zip(*locations))
+	plt.title('Data Plotting')
+	plt.grid(True)
+	plt.savefig("figure.png")
+	plt.show()
 
 
 # this is only executed if called explicitly. For debugging purposes only
