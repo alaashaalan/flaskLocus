@@ -26,6 +26,7 @@ class Trilateration():
 		for gateway in self.gateway_ids:
 			current_records = db.find_by_tag_id_gateway_id_date_range('raw_data', '*', self.beacon_id, gateway, self.start_time, self.end_time)
 			self.data_per_gateway[gateway] = np.array(current_records)
+			print self.data_per_gateway[gateway]
 
 
 	def trilaterate(self):

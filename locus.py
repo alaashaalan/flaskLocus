@@ -27,6 +27,11 @@ class Location:
 		return list_of_gateway_ids
 
 
+	def trilaterate(self):
+		pass
+
+
+
 
 class Gateway:
 	def __init__(self, gateway_id, x, y):
@@ -38,10 +43,9 @@ class Gateway:
 		return trilateration2d.point(self.x, self.y)
 
 class Beacon:
-	"""
-	not implemented
-	"""
+	# raise NotImplementedError
 	pass
+
 
 
 # class Record:

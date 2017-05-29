@@ -115,30 +115,28 @@ if __name__ == '__main__' :
     print intersect.x, intersect.y
 
 
-
-
 # if __name__ == '__main__' :
 
 #     p1 = point(0.81, 1.2)
 #     p2 = point(1.21, 0.69)
 #     p3 = point(0.87, 0.84)
 
-#     c1 = circle(p1, 0.70)
-#     c2 = circle(p2, 0.51)
-#     c3 = circle(p3, 0.63)
+    # c1 = circle(p1, 0.70)
+    # c2 = circle(p2, 0.51)
+    # c3 = circle(p3, 0.63)
 
-#     circle_list = [c1, c2, c3]
+    # circle_list = [c1, c2, c3]
 
-#     inner_points = []
-#     for p in get_all_intersecting_points(circle_list):
-#         if is_contained_in_circles(p, circle_list):
-#             inner_points.append(p) 
+    # inner_points = []
+    # for p in get_all_intersecting_points(circle_list):
+    #     if is_contained_in_circles(p, circle_list):
+    #         inner_points.append(p) 
     
-#     center = get_polygon_center(inner_points)
-#     in_json = json_data([c1, c2, c3], [p1, p2, p3], center)
+    # center = get_polygon_center(inner_points)
+    # in_json = json_data([c1, c2, c3], [p1, p2, p3], center)
 
-#     out_json = json.dumps(in_json, sort_keys=True,
-#                      indent=4, default=serialize_instance)
+    # out_json = json.dumps(in_json, sort_keys=True,
+    #                  indent=4, default=serialize_instance)
 
-#     with open("data.json", 'w') as fw:
-#         fw.write(out_json)
+    # with open("data.json", 'w') as fw:
+    #     fw.write(out_json)
