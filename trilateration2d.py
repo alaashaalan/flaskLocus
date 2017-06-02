@@ -18,6 +18,9 @@ class point(object):
         self.x = x
         self.y = y
 
+    def to_array(self):
+        return [self.x, self.y]
+
 class circle(object):
     def __init__(self, point, radius):
         self.center = point
