@@ -39,7 +39,7 @@ class Trilateration():
 			new_rssi_list = []
 			for ind, record in enumerate(self.data_per_gateway[gateway]):
 				rssi = record[3]
-				new_rssi = np.random.normal(record[3], 8)
+				new_rssi = np.random.normal(record[3], 6)
 				new_rssi_list.append(new_rssi)
 				# print rssi, new_rssi
 				record[3] = new_rssi
@@ -87,6 +87,7 @@ class Trilateration():
 			# plt.ion()
 			# plt.show()
 			optimization_trilateration.plotting(gateway_coordinates, distances, center)
+			plt.plot([5, 5], [0, 10], color='k', linestyle='-', linewidth=1)
 		plt.show()
 			# plt.savefig(str(ind))
 			# images.append(imageio.imread(str(ind) + '.png'))

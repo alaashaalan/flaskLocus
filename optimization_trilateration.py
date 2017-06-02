@@ -48,7 +48,7 @@ def plotting(locations, distances, found_location):
 	plt.axis([-5,20,-5,20])
 	ax=fig.add_subplot(1,1,1)
 
-	circ=plt.Circle(found_location, radius=0.5, color='r', fill=True)
+	circ=plt.Circle(found_location, radius=0.2, color='r', fill=True)
 	ax.add_patch(circ)
 
 	for dist, loc in zip(distances, locations):
