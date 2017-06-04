@@ -12,7 +12,7 @@ import trilateration2d
 import optimization_trilateration
 
 MIN_NUMBER_OF_GATEWAYS_FOR_TRIANGULATION = 3
-AVERAGING_WINDOW = 15
+AVERAGING_WINDOW = 30
 
 class Trilateration():
 	def __init__(self, location, beacon_id, gateway_ids, start_time, end_time):
@@ -39,11 +39,16 @@ class Trilateration():
 			new_rssi_list = []
 			for ind, record in enumerate(self.data_per_gateway[gateway]):
 				rssi = record[3]
-				new_rssi = np.random.normal(record[3], 6)
+				# new_rssi = np.random.normal(record[3], 0)
+				new_rssi = record[3]
 				new_rssi_list.append(new_rssi)
 				# print rssi, new_rssi
 				record[3] = new_rssi
 			print(np.std(new_rssi_list))
+			plt.figure(2)
+			plt.plot(new_rssi_list)
+			plt.figure(1)
+			# plt.show()
 
 			print self._moving_average(self.data_per_gateway[gateway], AVERAGING_WINDOW)
 
@@ -66,6 +71,7 @@ class Trilateration():
 			record = self.matched_timestamps[time]
 
 			if len(self.matched_timestamps[time]) < MIN_NUMBER_OF_GATEWAYS_FOR_TRIANGULATION:
+				print "not enough gateways"
 				continue
 
 			# convert rssis to meters
@@ -86,14 +92,20 @@ class Trilateration():
 			# fig=plt.figure(1)
 			# plt.ion()
 			# plt.show()
+			plt.clf()
 			optimization_trilateration.plotting(gateway_coordinates, distances, center)
-			plt.plot([5, 5], [0, 10], color='k', linestyle='-', linewidth=1)
-		plt.show()
-			# plt.savefig(str(ind))
-			# images.append(imageio.imread(str(ind) + '.png'))
+			# plt.plot([5, 5], [0, 10], color='k', linestyle='-', linewidth=1)
+			plt.legend(distances)
+
+			plt.savefig('gif/' + str(ind))
+			# images.append(imageio.imread('gif/' + str(ind) + '.png'))
+		
+			
+			
 			# plt.draw()
 		# kargs = { 'duration': 0.1 }
-		# imageio.mimsave('trilateration.gif', images, **kargs)
+		# imageio.mimsave('gif/trilateration.gif', images, **kargs)
+		plt.show()
 
 	def find_unique_timestamps(self):
 		timestamps = set([])
@@ -186,13 +198,22 @@ class Trilateration():
 
 if __name__ == '__main__':
 
-	location = locus.Location('location_fake_data.json')
+	location = locus.Location('location_park.json')
 	# print location.list_of_beacons
 	beacon = location.list_of_beacons[0]
 	gateway_ids = location.get_all_gateway_ids()
 
 	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 5, 29, 16, 48, 00), datetime.datetime(2017, 5, 29, 16, 54, 59))
-	a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 02, 00, 00, 00), datetime.datetime(2017, 6, 03, 16, 54, 59))
+	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 02, 00, 00, 00), datetime.datetime(2017, 6, 03, 16, 54, 59))
+
+
+	# park first test
+	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 03, 00, 5, 00), datetime.datetime(2017, 6, 03, 00,6, 00))
+
+
+	# park second test try:
+	a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 03, 00, 10, 00), datetime.datetime(2017, 6, 03, 00,11, 00))
+
 
 	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 5, 30, 12, 01, 59), datetime.datetime(2017, 5, 30, 12, 02, 32))
 

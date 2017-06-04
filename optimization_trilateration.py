@@ -45,7 +45,7 @@ def trilaterate(locations, distances):
 
 def plotting(locations, distances, found_location):
 	fig=plt.figure(1)
-	plt.axis([-5,20,-5,20])
+	plt.axis([-15,35,-15,35])
 	ax=fig.add_subplot(1,1,1)
 
 	circ=plt.Circle(found_location, radius=0.2, color='r', fill=True)
@@ -53,7 +53,7 @@ def plotting(locations, distances, found_location):
 
 	for dist, loc in zip(distances, locations):
 		circ=plt.Circle(loc, radius=dist, color='g', fill=False)
-		# ax.add_patch(circ)
+		ax.add_patch(circ)
 
 
 if __name__ == "__main__":
