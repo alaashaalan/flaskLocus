@@ -1,5 +1,8 @@
 # flaskLocus
 
+# SSH into server
+'ssh -i locus.pem ubuntu@52.91.226.215'
+
 # Running the flask application
 1. Install flask: `pip install flask`
 2. In /flaskLocus: `export FLASK_APP=init.py`
