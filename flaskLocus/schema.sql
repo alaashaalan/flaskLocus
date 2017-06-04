@@ -5,8 +5,9 @@ CREATE TABLE raw_data (
 	tag_id VARCHAR(50), 
 	gateway_id VARCHAR(50), 
 	rssi SMALLINT(10), 
-	raw_packet_content VARCHAR(100) , 
+	raw_packet_content VARCHAR(100),
 	label VARCHAR(100),
+	ntp DATETIME(6),
 	PRIMARY KEY (id)
 );
 
