@@ -21,10 +21,10 @@ def connection():
 def insert_raw_data(row):
 	database, cursor = connection()
 	insert_statement = (
-		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, label)"
-		"VALUES (%s, %s, %s, %s, %s, %s)"
+		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, label, ntp)"
+		"VALUES (%s, %s, %s, %s, %s, %s, %s)"
 		)
-	data = (row['time_stamp'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content'], row['label'])
+	data = (row['time_stamp'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content'], row['label'], row['ntp'])
 
 	cursor.execute(insert_statement, data)
 	database.commit()
