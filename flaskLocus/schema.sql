@@ -7,7 +7,7 @@ CREATE TABLE raw_data (
 	rssi SMALLINT(10), 
 	raw_packet_content VARCHAR(100),
 	label VARCHAR(100),
-	ntp DATETIME(6),
+	ntp INT(11),
 	PRIMARY KEY (id)
 );
 
