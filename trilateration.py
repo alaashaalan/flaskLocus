@@ -2,7 +2,7 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.dates import date2num
-import imageio
+
 import random
 
 import db
@@ -12,7 +12,7 @@ import trilateration2d
 import optimization_trilateration
 
 MIN_NUMBER_OF_GATEWAYS_FOR_TRIANGULATION = 3
-AVERAGING_WINDOW = 30
+AVERAGING_WINDOW = 5
 
 class Trilateration():
 	def __init__(self, location, beacon_id, gateway_ids, start_time, end_time):
@@ -33,6 +33,11 @@ class Trilateration():
 
 
 	def trilaterate(self):
+		# run slope limitation & remove outliers
+		for gateway in self.gateway_ids:
+			self._slope_filter(self.data_per_gateway[gateway])
+
+
 		# smooth rssi using running average
 		for gateway in self.gateway_ids:
 			print gateway
@@ -48,7 +53,6 @@ class Trilateration():
 			plt.figure(2)
 			plt.plot(new_rssi_list)
 			plt.figure(1)
-			# plt.show()
 
 			print self._moving_average(self.data_per_gateway[gateway], AVERAGING_WINDOW)
 
@@ -107,6 +111,8 @@ class Trilateration():
 		# imageio.mimsave('gif/trilateration.gif', images, **kargs)
 		plt.show()
 
+	
+
 	def find_unique_timestamps(self):
 		timestamps = set([])
 
@@ -117,6 +123,26 @@ class Trilateration():
 
 		return sorted(timestamps)
 
+	def _slope_filter(self, records):
+		rssis = []
+		timestamps = []
+		#Get all Rssi & Time stamps
+		for record in records:					
+			rssis.append(record[3])
+			timestamps.append(record[0])
+		#Get all max dist between time stamps (1m/s)
+		#Then overwrite Rssis w/ filtered values
+		for count in range(1, len(rssis)):
+			curr_time = timestamps[count]
+			last_time = timestamps[count - 1]
+			time_delta = curr_time - last_time
+			#Max speed 1m/s therefore no need for unit conversion. Conv from date time to float
+			max_delta = time_delta.total_seconds()
+			last_dist = helper_functions.rssi_to_meter(rssis[count-1])
+			rssis[count] = helper_functions.slope_limit_rssi(rssis[count], last_dist, max_delta )
+	
+		for filt_rssi, record in zip(rssis, records):
+			record[3] = filt_rssi
 
 	def _moving_average(self, records, window):
 		# TODO: need to average based on last and next N seconds, not last and next N records
@@ -199,8 +225,14 @@ class Trilateration():
 if __name__ == '__main__':
 
 	location = locus.Location('location_park.json')
-	# print location.list_of_beacons
-	beacon = location.list_of_beacons[0]
+	print location.list_of_beacons[0]
+	print location.list_of_beacons[1]
+	print location.list_of_beacons[2]
+	print location.list_of_beacons[3]
+	
+
+
+	beacon = location.list_of_beacons[3]
 	gateway_ids = location.get_all_gateway_ids()
 
 	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 5, 29, 16, 48, 00), datetime.datetime(2017, 5, 29, 16, 54, 59))
@@ -212,7 +244,7 @@ if __name__ == '__main__':
 
 
 	# park second test try:
-	a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 03, 00, 10, 00), datetime.datetime(2017, 6, 03, 00,11, 00))
+	a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 03, 00, 10, 00), datetime.datetime(2017, 6, 03, 00,11, 54))
 
 
 	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 5, 30, 12, 01, 59), datetime.datetime(2017, 5, 30, 12, 02, 32))
