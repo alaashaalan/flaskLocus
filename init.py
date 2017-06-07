@@ -55,6 +55,13 @@ def intake():
 		response = data
 	return response
 
+@app.route('/gateway', methods=['GET','POST'])
+def gateway():
+	# read the current app status
+		data = request.get_data()
+		data2 = request.data()
+	return data + '\n' + data2
+
 
 @app.route( '/login' , methods=[ 'GET' ,  'POST' ]) 
 def login():
