@@ -59,11 +59,18 @@ def intake():
 @app.route('/gateway', methods=['GET','POST'])
 def gateway():
 	# read the current app status
+	status, label = db.get_app_state()
 	data = request.get_data()
-	LOG_FILE = open(log, 'a+')
-	LOG_FILE.write(data)
-	LOG_FILE.close()
-	return data
+
+	if status == 0:
+		response = "app status is 0. Data not processed"
+	else:	
+		# read the current app status
+		response = data
+		LOG_FILE = open(log, 'a+')
+		LOG_FILE.write(data)
+		LOG_FILE.close()
+	return response
 
 
 @app.route( '/login' , methods=[ 'GET' ,  'POST' ]) 
