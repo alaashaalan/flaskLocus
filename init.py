@@ -13,6 +13,7 @@ celery = celery_app.make_celery(app)
 
 log = 'log'
 
+
 @app.route('/', methods=['GET','POST']) 
 def index():
 	state, label = db.get_app_state()
@@ -58,9 +59,11 @@ def intake():
 @app.route('/gateway', methods=['GET','POST'])
 def gateway():
 	# read the current app status
-		data = request.get_data()
-		data2 = request.data()
-	return data + '\n' + data2
+	data = request.get_data()
+	LOG_FILE = open(log, 'a+')
+	LOG_FILE.write(data)
+	LOG_FILE.close()
+	return data
 
 
 @app.route( '/login' , methods=[ 'GET' ,  'POST' ]) 
