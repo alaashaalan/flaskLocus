@@ -1,13 +1,12 @@
 DROP TABLE if exists raw_data;
 CREATE TABLE raw_data (
-	id INT NOT NULL AUTO_INCREMENT, 
-	time_stamp DATETIME(6), 
+	id INT NOT NULL AUTO_INCREMENT,  
 	tag_id VARCHAR(50), 
 	gateway_id VARCHAR(50), 
 	rssi SMALLINT(10), 
 	raw_packet_content VARCHAR(100),
-	label VARCHAR(100),
 	ntp INT(11),
+	label VARCHAR(100),
 	PRIMARY KEY (id)
 );
 
