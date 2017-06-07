@@ -12,7 +12,7 @@ import trilateration2d
 import optimization_trilateration
 
 MIN_NUMBER_OF_GATEWAYS_FOR_TRIANGULATION = 3
-AVERAGING_WINDOW = 30
+AVERAGING_WINDOW = 5
 
 class Trilateration():
 	def __init__(self, location, beacon_id, gateway_ids, start_time, end_time):
@@ -212,7 +212,7 @@ if __name__ == '__main__':
 
 
 	# park second test try:
-	a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 03, 00, 10, 00), datetime.datetime(2017, 6, 03, 00,11, 00))
+	a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 03, 00, 10, 00), datetime.datetime(2017, 6, 03, 00,11, 54))
 
 
 	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 5, 30, 12, 01, 59), datetime.datetime(2017, 5, 30, 12, 02, 32))
