@@ -15,10 +15,10 @@ MIN_NUMBER_OF_GATEWAYS_FOR_TRIANGULATION = 3
 AVERAGING_WINDOW = 5
 
 class Trilateration():
-	def __init__(self, location, beacon_id, gateway_ids, start_time, end_time):
+	def __init__(self, location, beacon_id, start_time, end_time):
 		self.location = location
 		self.beacon_id = beacon_id
-		self.gateway_ids = gateway_ids
+		self.gateway_ids = get_all_gateway_ids
 		self.start_time = start_time
 		self.end_time = end_time
 
