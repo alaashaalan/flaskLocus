@@ -30,18 +30,19 @@ def insert_message(message):
 
 	insert_statement = (
 		"INSERT INTO raw_data (tag_id, gateway_id, rssi, raw_packet_content, ntp, label)"
-		"VALUES (%s, %s, %s, %s, %s, %s, %s)"
+		"VALUES (%s, %s, %s, %s, %s, %s)"
 		)
-	data = (message[1], message[2], message[3], message[4], message[5], label)
 
+	message = message.split(',')
+	data = (message[1], message[2], message[3], message[4], message[5], label)
 	cursor.execute(insert_statement, data)
 	database.commit()
 	database.close()
-	
+
 
 def validate_message(message):
 	message_values = message.split(',')
-	if message_values[0] = "$GPRP":  #if this is not a valid message from the gateway, ignore
+	if message_values[0] == "$GPRP":  #if this is not a valid message from the gateway, ignore
 		return True
 	else:
 		return False

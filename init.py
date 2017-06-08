@@ -40,11 +40,11 @@ def startstop():
 def intake():
 	# check if allowed
 	if not db.get_app_state():
-		return ("app status is 0. Data not processed", 403)
+		return ("app status is 0. Data not processed\n", 403)
 	else:	
 		data = request.get_data()
 		db.insert_multiple_messages(data)
-	return (data, 200)
+	return (data + '\n', 200)
 
 
 @celery.task(name='celery_timestamp_matching')
