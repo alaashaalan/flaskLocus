@@ -27,14 +27,15 @@ def insert_message(message):
 
 	database, cursor = connection()
 	label = get_app_label()
+	time_stamp = datetime.fromtimestamp(message[5]).strftime('%Y-%m-%d %H:%M:%S')
 
 	insert_statement = (
-		"INSERT INTO raw_data (tag_id, gateway_id, rssi, raw_packet_content, ntp, label)"
-		"VALUES (%s, %s, %s, %s, %s, %s)"
+		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, ntp, label)"
+		"VALUES (%s, %s, %s, %s, %s, %s, %s)"
 		)
 
 	message = message.split(',')
-	data = (message[1], message[2], message[3], message[4], message[5], label)
+	data = (time_stamp, message[1], message[2], message[3], message[4], message[5], label)
 	cursor.execute(insert_statement, data)
 	database.commit()
 	database.close()
