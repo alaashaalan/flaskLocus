@@ -11,12 +11,11 @@ app = Flask(__name__)
 celery_config(app)
 celery = celery_app.make_celery(app)
 
-log = 'log'
 
 @app.route('/', methods=['GET','POST']) 
 def index():
-	state, label = db.get_app_state()
-	print state, label
+	state = db.get_app_state()
+	label = db.get_app_label()
 	if state == 0:
 		form = render_template('start_app.html', intake=state, label=label)
 	else:
@@ -26,7 +25,6 @@ def index():
 
 @app.route('/startstop', methods=['POST'])
 def startstop():
-	print('start stop')
 	if request.form['button'] == 'start':
 		label = request.form['label']
 		status = 1
@@ -38,30 +36,15 @@ def startstop():
 	return redirect(url_for('index'))
 
 
-
-@app.route('/intake', methods=['GET','POST'])
+@app.route('/intake', methods=['POST'])
 def intake():
-	# read the current app status
-	status, label = db.get_app_state()
-
-	if status == 0:
-		response = "app status is 0. Data not processed"
+	# check if allowed
+	if not db.get_app_state():
+		return ("app status is 0. Data not processed\n", 403)
 	else:	
 		data = request.get_data()
-		data = str(datetime.datetime.now()).split('.')[0]+',' + data + ',' + label
-		processed_message = helper_functions.process_message(data)
-		if processed_message:
-			db.insert_raw_data(processed_message)
-		response = data
-	return response
-
-
-@app.route( '/login' , methods=[ 'GET' ,  'POST' ]) 
-def login():
-	if request.method ==  'POST' :
-	 	do_the_login()
-	else: 
-		show_the_login_form()
+		db.insert_multiple_messages(data)
+	return (data + '\n', 200)
 
 
 @celery.task(name='celery_timestamp_matching')

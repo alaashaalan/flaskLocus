@@ -9,21 +9,6 @@ def rssi_to_meter(rssi): #code works but will need some modification based what 
 	distance = 10**((RSSI_1m - rssi)/20)
 	return distance
 
-# Process raw message and return as dictionary
-def process_message(message):
-	"""
-	take a message string and parse it
-	return: None
-	"""
-	message_values = message.split(',')
-	print message_values
-	if message_values[1] != "$GPRP":  #if this is not a valid message from the gateway, ignore
-		print('ignoring this message')
-		processed_message = {}
-	else:
-		# print message_values		
-		processed_message = {'time_stamp': message_values[0],'report_type': message_values[1], 'tag_id': message_values[2], 'gateway_id': message_values[3], 'rssi': message_values[4], 'raw_packet_content': message_values[5], 'ntp': message_values[6], 'label': message_values[7]}
-	return processed_message
 
 def timestamp_matching():
 	"""

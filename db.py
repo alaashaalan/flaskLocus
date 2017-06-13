@@ -18,17 +18,48 @@ def connection():
 	return database, cursor
 
 # Inserts newly collected data to table raw_data
-def insert_raw_data(row):
+def insert_message(message):
+	"""
+	sample message: "$GPRP,0CF3EE0B0BDD,CD2DA08685AD,-67,0201061AFF4C0002152F234454CF6D4A0FADF2F4911BA9FFA600000001C5,1496863953"
+	"""
+	if not validate_message(message):
+		return
+
+	message = message.split(',')
 	database, cursor = connection()
+	label = get_app_label()
+	time_stamp = datetime.fromtimestamp(int(message[5])).strftime('%Y-%m-%d %H:%M:%S')
+
 	insert_statement = (
-		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, label, ntp)"
+		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, ntp, label)"
 		"VALUES (%s, %s, %s, %s, %s, %s, %s)"
 		)
-	data = (row['time_stamp'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content'], row['label'], row['ntp'])
 
+	data = (time_stamp, message[1], message[2], message[3], message[4], message[5], label)
 	cursor.execute(insert_statement, data)
 	database.commit()
 	database.close()
+
+
+def validate_message(message):
+	message_values = message.split(',')
+	if message_values[0] == "$GPRP":  #if this is not a valid message from the gateway, ignore
+		return True
+	else:
+		return False
+
+
+def insert_multiple_messages(messages):
+	"""
+	sample messages: 
+	$GPRP,0CF3EE0B0BDD,CD2DA08685AD,-67,0201061AFF4C0002152F234454CF6D4A0FADF2F4911BA9FFA600000001C5,1496863953
+	$GPRP,0CF3EE0B0BDD,CD2DA08685AD,-67,0201061AFF4C0002152F234454CF6D4A0FADF2F4911BA9FFA600000001C5,1496863953
+	"""
+
+	messages = messages.split('\n')
+	for message in messages:
+		insert_message(message)
+
 
 
 def find_avg_rssi(start_time, end_time, beacon, gateway):
@@ -120,9 +151,19 @@ def get_app_state():
 	database.close()
 	status = state[0]
 	label = state[1]
-	return status, label
+	return status
 
-
+def get_app_label():
+	database, cursor = connection()
+	select_statement = 	"""
+	   SELECT * from app_state
+	"""
+	cursor.execute(select_statement)
+	state = cursor.fetchone()
+	database.close()
+	status = state[0]
+	label = state[1]
+	return label
 
 # this is only executed if called explicitly. For debugging purposes only
 if __name__ == '__main__':
