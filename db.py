@@ -25,6 +25,7 @@ def insert_message(message):
 	if not validate_message(message):
 		return
 
+	message = message.split(',')
 	database, cursor = connection()
 	label = get_app_label()
 	time_stamp = datetime.fromtimestamp(int(message[5])).strftime('%Y-%m-%d %H:%M:%S')
@@ -34,7 +35,6 @@ def insert_message(message):
 		"VALUES (%s, %s, %s, %s, %s, %s, %s)"
 		)
 
-	message = message.split(',')
 	data = (time_stamp, message[1], message[2], message[3], message[4], message[5], label)
 	cursor.execute(insert_statement, data)
 	database.commit()
