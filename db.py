@@ -27,7 +27,7 @@ def insert_message(message):
 
 	database, cursor = connection()
 	label = get_app_label()
-	time_stamp = datetime.fromtimestamp(message[5]).strftime('%Y-%m-%d %H:%M:%S')
+	time_stamp = datetime.fromtimestamp(int(message[5])).strftime('%Y-%m-%d %H:%M:%S')
 
 	insert_statement = (
 		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, ntp, label)"
