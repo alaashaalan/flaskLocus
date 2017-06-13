@@ -6,7 +6,6 @@ import json
 import math
 from json import encoder
 import helper_functions
-# from pandas.io import sql  # Not sure if i need this 
 import db
 from datetime import date, datetime, timedelta
 
@@ -49,9 +48,24 @@ def get_two_circles_intersecting_points(c1, c2):
     r2 = c2.radius
 
     d = get_two_points_distance(p1, p2)
-    # if to far away, or self contained - can't be done
-    if d >= (r1 + r2) or d <= math.fabs(r1 -r2):
-        return None
+    diff = get_two_points_distance(p1, p2) - r1 - r2
+
+    if d <= math.fabs(r1 -r2):          # Need to come up with better solution for this. 
+        if r1<r2: 
+            x0=p1.x 
+            y0=p1.y
+        else: 
+            x0=p2.x
+            y0=p2.y
+        return [point(x0 , y0)]
+        
+    if d >= (r1 + r2): 
+        if r1 > r2: 
+            r2 = r2 + diff + 0.15
+            c2.radius = r2 
+        else: 
+            r1 = r1 + diff + 0.15
+            c1.radius = r1 
 
     a = (pow(r1, 2) - pow(r2, 2) + pow(d, 2)) / (2*d)
     h  = math.sqrt(pow(r1, 2) - pow(a, 2))
@@ -70,13 +84,29 @@ def get_all_intersecting_points(circles):
             res = get_two_circles_intersecting_points(circles[i], circles[k])
             if res:
                 points.extend(res)
+            else:
+                print("something wrong")
     return points
 
 def is_contained_in_circles(point, circles):
     for i in range(len(circles)):
-        if (get_two_points_distance(point, circles[i].center) > (circles[i].radius)):
+        if (get_two_points_distance(point, circles[i].center) > ((circles[i].radius)+.1)):
             return False
     return True
+
+def least_square_approx(points, circles):
+    min_dist = pow(999,10)
+    num = len(points)
+    for i in range(num):
+        dist = 0
+        for j in range(len(circles)):
+            dist += pow(get_two_points_distance(points[i], circles[j].center), 2)
+        if (dist<min_dist):
+            min_dist = dist
+            dist = 0
+            min_point = points[i]
+    return min_point
+
 
 def get_polygon_center(points):
     center = point(0, 0)
@@ -84,13 +114,13 @@ def get_polygon_center(points):
     for i in range(num):
         center.x += points[i].x
         center.y += points[i].y
-		
-	if (num==0): 
-		center.x=0
-		center.y=0
-	else:
-		center.x /= num
-		center.y /= num
+
+    if (num==0): 
+        center.x=0
+        center.y=0
+    else:
+        center.x /= num
+        center.y /= num
     return center
 
 def perdelta(start, end, delta):
@@ -102,12 +132,12 @@ def perdelta(start, end, delta):
         yield curr
         curr += delta
 
-
 def timestamp_matching(start_time, end_time, beacon, gateway_ids):
 
     p1 = point(0.00, 0.00)                       #gateway coordinates here 
     p2 = point(3.53, 3.66)
     p3 = point(0.00, 7.35)
+    
 
     # create a new table
     database, cursor = db.connection();
@@ -135,7 +165,7 @@ def timestamp_matching(start_time, end_time, beacon, gateway_ids):
         d1= helper_functions.rssi_to_meter(rssi1)
         d2= helper_functions.rssi_to_meter(rssi2)
         d3= helper_functions.rssi_to_meter(rssi3)
-
+        
         c1 = circle(p1, d1)                       
         c2 = circle(p2, d2)
         c3 = circle(p3, d3)
@@ -143,12 +173,19 @@ def timestamp_matching(start_time, end_time, beacon, gateway_ids):
         circle_list = [c1, c2, c3]
 
         inner_points = []
+        all_points = []
+        i = 0
         for p in get_all_intersecting_points(circle_list):
-         if is_contained_in_circles(p, circle_list):
-             inner_points.append(p) 
+            if is_contained_in_circles(p, circle_list):
+                i += 1
+                inner_points.append(p) 
+            all_points.append(p)
         
-        center = get_polygon_center(inner_points)
+        if (i==0):
+                p = least_square_approx(all_points,circle_list)
+                inner_points.append(p)
 
+        center = get_polygon_center(inner_points)
         insert_statement = "INSERT INTO matched_timestamps (time_stamp, rssi1, rssi2, rssi3, dist1, dist2, dist3, locx, locy) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
         data = (str(timestamp), rssi1, rssi2, rssi3, d1, d2, d3, center.x, center.y)
 
