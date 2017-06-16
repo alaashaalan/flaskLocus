@@ -18,7 +18,7 @@ class Trilateration():
 	def __init__(self, location, beacon_id, start_time, end_time):
 		self.location = location
 		self.beacon_id = beacon_id
-		self.gateway_ids = get_all_gateway_ids
+		self.gateway_ids = location.get_all_gateway_ids()
 		self.start_time = start_time
 		self.end_time = end_time
 
@@ -27,15 +27,17 @@ class Trilateration():
 
 		self.data_per_gateway = {}  # e.g. self.data_per_gateway[0] all records for gateway_ids[0] etc
 		for gateway in self.gateway_ids:
-			current_records = db.find_by_tag_id_gateway_id_date_range('raw_data', '*', self.beacon_id, gateway, self.start_time, self.end_time)
+			# current_records = db.find_by_tag_id_gateway_id_date_range('raw_data', '*', self.beacon_id, gateway, self.start_time, self.end_time)
+			current_records = db.find_by_tag_id_gateway_id_ntp_range('raw_data', '*', self.beacon_id, gateway, self.start_time, self.end_time)
+
 			self.data_per_gateway[gateway] = np.array(current_records)
 			# print self.data_per_gateway[gateway]
 
 
 	def trilaterate(self):
 		# run slope limitation & remove outliers
-		for gateway in self.gateway_ids:
-			self._slope_filter(self.data_per_gateway[gateway])
+		# for gateway in self.gateway_ids:
+			# self._slope_filter(self.data_per_gateway[gateway])
 
 
 		# smooth rssi using running average
@@ -137,7 +139,7 @@ class Trilateration():
 			last_time = timestamps[count - 1]
 			time_delta = curr_time - last_time
 			#Max speed 1m/s therefore no need for unit conversion. Conv from date time to float
-			max_delta = time_delta.total_seconds()
+			# max_delta = time_delta.total_seconds()
 			last_dist = helper_functions.rssi_to_meter(rssis[count-1])
 			rssis[count] = helper_functions.slope_limit_rssi(rssis[count], last_dist, max_delta )
 	
@@ -225,12 +227,6 @@ class Trilateration():
 if __name__ == '__main__':
 
 	location = locus.Location('location_park.json')
-	print location.list_of_beacons[0]
-	print location.list_of_beacons[1]
-	print location.list_of_beacons[2]
-	print location.list_of_beacons[3]
-	
-
 
 	beacon = location.list_of_beacons[3]
 	gateway_ids = location.get_all_gateway_ids()
@@ -244,9 +240,16 @@ if __name__ == '__main__':
 
 
 	# park second test try:
-	a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 03, 00, 10, 00), datetime.datetime(2017, 6, 03, 00,11, 54))
+	# a = Trilateration(location, beacon, datetime.datetime(2017, 6, 03, 00, 10, 00), datetime.datetime(2017, 6, 03, 00,10, 1))
+
+	# save on trilateration
+	a = Trilateration(location, beacon, 1496863930, 1496863940)
 
 
+	print a.data_per_gateway.keys()
+	print len(a.data_per_gateway['CD2DA08685AD'])
+	print len(a.data_per_gateway['D897B89C7B2F'])
+	print len(a.data_per_gateway['CD2DA08685AD'])
 	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 5, 30, 12, 01, 59), datetime.datetime(2017, 5, 30, 12, 02, 32))
 
 	# print(a.data_per_gateway[gateway_ids[0]])     

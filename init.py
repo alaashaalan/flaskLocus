@@ -69,22 +69,17 @@ def login():
 @app.route( '/timestamp_matching' , methods=[ 'GET']) 
 def daily_processing():
 # def celery_timestamp_matching():
-"""
-produces filtered x,y coordinates per day per location
-takes raw data
-produces xy coordinates (saves to predifined table)
-"""
-	start_time = datetime.datetime.now() - datetime.timedelta(days=1)
+	"""
+	produces filtered x,y coordinates per day per location
+	takes raw data
+	produces xy coordinates (saves to predifined table)
+	"""
+	start_time = datetime.datetime.now() - datetime.timedelta(seconds=1)
 	end_time = datetime.datetime.now()
 	location = Location('location.json')
 	beacon_id = location.list_of_beacons[0]
-	gateway_ids = location.get_all_gateway_ids()
 
 
-
-
-	trilateration = Trilateration(self, location, beacon_id, gateway_ids, start_time, end_time)
+	trilateration = Trilateration(self, location, beacon_id, start_time, end_time)
 	# trilateration.trilaterate()
-
-	# result = trilateration_mysql.timestamp_matching(start_time, end_time, tag_id, gateway_ids)
 	return 'Data Processed successfully on' + str(datetime.datetime.now())

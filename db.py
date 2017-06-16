@@ -67,7 +67,18 @@ def find_by_tag_id(table_name, fields, tag_id):
 
 	return records
 
+def find_by_tag_id_gateway_id_ntp_range(table_name, fields, tag_id, gateway_id, start_ntp, end_ntp):
+	database, cursor = connection()
+	query ="SELECT {} FROM {} WHERE tag_id = {} AND gateway_id = {} AND ntp >= {} AND ntp <= {}".format(fields, table_name, '%s', '%s', '%s', '%s')
+	cursor.execute(query, [tag_id, gateway_id, start_ntp, end_ntp])
+	records = cursor.fetchall()
+	database.close()
+
+	return records
+
+
 def find_by_tag_id_gateway_id_date_range(table_name, fields, tag_id, gateway_id, start_time, end_time):
+	raise NotImplementedError 
 	database, cursor = connection()
 	query ="SELECT {} FROM {} WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format(fields, table_name, '%s', '%s', '%s', '%s')
 	cursor.execute(query, [tag_id, gateway_id, start_time, end_time])
