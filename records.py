@@ -323,16 +323,16 @@ if __name__ == "__main__":
 
 	# specify what beacon, gateway and timerange you're interested in
 	# filter length=None means no filter
-	# if you put filter=5 for example you will use moving average over 5 seconds
+	# if you put filter=10 for example you will use moving average over 10 seconds
 	matched_timestamps.init_from_database('D001D664D4DD', 
 		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
 		datetime(2017, 6, 16, 20, 00, 18, 0), datetime(2017, 6, 16, 23, 59, 18, 0), 
-		filter_length=None)
+		filter_length=10)
 
 	matched_timestamps = matched_timestamps.remove_nan()
 	
 	# split the entire datasat into training and testing
-	training, testing = matched_timestamps.train_test_split(training_size=0.6, seed=0)
+	training, testing = matched_timestamps.train_test_split(training_size=0.7, seed=None)
 
 	# create a classfier using the trainging dataset
 	cvm = training.train_CVM()
@@ -340,8 +340,10 @@ if __name__ == "__main__":
 	# assigin the classifier to the testing dataset
 	testing.classifier = cvm
 	
-	# chech accuracy of the testing dataset with training classifier
-	print testing.accuracy_of_model()
+	# check accuracy of the testing dataset with training classifier
+	accuracy = testing.accuracy_of_model()
+	print "accuracy of the testing data is: " + str(accuracy)
+	
 
 # 	plot all data
 	fig = plt.figure()
