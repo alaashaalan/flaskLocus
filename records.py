@@ -276,11 +276,11 @@ class MatchedTimestamps:
 
 
 		
-	def train_test_split(self, test_size=0.5, seed=None):
+	def train_test_split(self, training_size=0.5, seed=None):
 		gateway_list = self.gateway_list
 
 		number_of_records = len(self.data_frame)
-		split = int(number_of_records * test_size)
+		split = int(number_of_records * training_size)
 
 		np.random.seed(seed)
 		indices = np.random.permutation(number_of_records)
@@ -320,6 +320,10 @@ class MatchedTimestamps:
 if __name__ == "__main__":
 
 	matched_timestamps =  MatchedTimestamps()
+
+	# specify what beacon, gateway and timerange you're interested in
+	# filter length=None means no filter
+	# if you put filter=5 for example you will use moving average over 5 seconds
 	matched_timestamps.init_from_database('D001D664D4DD', 
 		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
 		datetime(2017, 6, 16, 20, 00, 18, 0), datetime(2017, 6, 16, 23, 59, 18, 0), 
@@ -327,18 +331,19 @@ if __name__ == "__main__":
 
 	matched_timestamps = matched_timestamps.remove_nan()
 	
-	matched_timestamps.train_CVM()
-	print matched_timestamps.accuracy_of_model()
+	# split the entire datasat into training and testing
+	training, testing = matched_timestamps.train_test_split(training_size=0.6, seed=0)
 
-	training, testing = matched_timestamps.train_test_split(test_size=0.6, seed=0)
-
+	# create a classfier using the trainging dataset
 	cvm = training.train_CVM()
 
+	# assigin the classifier to the testing dataset
 	testing.classifier = cvm
 	
+	# chech accuracy of the testing dataset with training classifier
 	print testing.accuracy_of_model()
 
+# 	plot all data
 	fig = plt.figure()
 	matched_timestamps.plot()
-
 	plt.show()
