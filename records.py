@@ -318,31 +318,7 @@ class MatchedTimestamps:
 		return self.data_frame.__repr__()
 		
 if __name__ == "__main__":
-	timestamp1 = datetime.now()
-	timestamp2 = timestamp1 + timedelta(seconds=1)
 
-	record1 = Record(rssi=100, timestamp=timestamp1)
-	record2 = Record(rssi=0, timestamp=timestamp1)
-	record3 = Record(rssi=100, timestamp=timestamp2)
-	record4 = Record(rssi=0, timestamp=timestamp2)
-
-	new_lsit = ListOfRecords()
-	new_lsit.append(record1)
-	new_lsit.append(record2)
-	new_lsit.append(record3)
-	new_lsit.append(record4)
-
-	# print new_lsit.get_rssis()
-	another_new_lsit = new_lsit.filter(window=2)
-	# print another_new_lsit.find_unique_timestamps()
-
-	# print another_new_lsit.average_per_second()
-
-
-	# list_of_records = ListOfRecords()
-	# list_of_records.from_database('A', 'A', datetime(2017, 6, 15, 23, 51, 18, 826376), datetime(2017, 6, 15, 23, 51, 18, 826376))
-	# pandas_dataframe, all_data = matched_timestamps('A', ['A', 'B', 'C'], datetime(2017, 6, 15, 23, 51, 18, 826376), datetime(2017, 6, 15, 23, 51, 19, 826376))
-	
 	matched_timestamps =  MatchedTimestamps()
 	matched_timestamps.init_from_database('D001D664D4DD', 
 		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
@@ -350,16 +326,11 @@ if __name__ == "__main__":
 		filter_length=None)
 
 	matched_timestamps = matched_timestamps.remove_nan()
-	# print matched_timestamps.data_frame
-
 	
 	matched_timestamps.train_CVM()
 	print matched_timestamps.accuracy_of_model()
 
 	training, testing = matched_timestamps.train_test_split(test_size=0.6, seed=0)
-
-	print len(training.data_frame)
-	print len(testing.data_frame)
 
 	cvm = training.train_CVM()
 
@@ -367,13 +338,7 @@ if __name__ == "__main__":
 	
 	print testing.accuracy_of_model()
 
-
 	fig = plt.figure()
 	matched_timestamps.plot()
 
-	fig = plt.figure()
-	training.plot()
-
-	fig = plt.figure()
-	testing.plot()	
 	plt.show()
