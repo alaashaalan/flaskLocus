@@ -254,11 +254,11 @@ class MatchedTimestamps:
 		return self.classifier		
 
 
-	def train_CVM(self):
+	def train_SVM(self):
 		data = np.array(self.data_frame[self.gateway_list])
 		labels = np.array(self.data_frame['label'])
 
-		clf = svm.SVC()
+		clf = svm.SVC(probability=True)
 		self.classifier = clf.fit(data, labels) 
 		return self.classifier
 
@@ -269,8 +269,11 @@ class MatchedTimestamps:
 		return self.classifier.score(data, labels)
 
 
-
 	def predict(self):
+		data = np.array(self.data_frame[self.gateway_list])
+		return self.classifier.predict(data)
+
+	def predict_proba(self):
 		data = np.array(self.data_frame[self.gateway_list])
 		print self.classifier.predict_proba(data)
 
@@ -312,6 +315,15 @@ class MatchedTimestamps:
 		ax.set_ylabel('Y Label')
 		ax.set_zlabel('Z Label')		
 
+	def _rename_label(self):
+		matched_timestamps_merged =  copy.deepcopy(self)
+		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['1-2'],'1-1')
+		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['1-4'],'1-3')
+		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['2-2'],'2-1')
+		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['2-4'],'2-3')	
+		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['3-2'],'3-1')
+		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['3-4'],'3-3')
+		return matched_timestamps_merged
 
 	def __repr__(self):
 
@@ -324,28 +336,58 @@ if __name__ == "__main__":
 	# specify what beacon, gateway and timerange you're interested in
 	# filter length=None means no filter
 	# if you put filter=10 for example you will use moving average over 10 seconds
-	matched_timestamps.init_from_database('D001D664D4DD', 
+
+	# classification 2017-06-16 4 groups
+	# matched_timestamps.init_from_database('0117C59B07A4', 
+	# 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+	# 	datetime(2017, 6, 16, 23, 34, 04, 0), datetime(2017, 6, 16, 23, 41, 51, 0), 
+	# 	filter_length=20)
+
+	# # classification 5360 2017-06-27
+	# matched_timestamps.init_from_database('0117C59B07A4', 
+	# 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+	# 	datetime(2017, 6, 27, 1, 00, 18, 0), datetime(2017, 6, 27, 23, 59, 18, 0), 
+	# 	filter_length=15)
+
+	# classification 2017-06-28 2 aisles
+	matched_timestamps.init_from_database('0117C59B07A4', 
 		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
-		datetime(2017, 6, 16, 20, 00, 18, 0), datetime(2017, 6, 16, 23, 59, 18, 0), 
-		filter_length=10)
+		datetime(2017, 6, 28, 19, 15, 04, 0), datetime(2017, 6, 28, 19, 35, 25, 0), 
+		filter_length=30)
 
 	matched_timestamps = matched_timestamps.remove_nan()
+
+	# matched_timestamps = matched_timestamps._rename_label() 
 	
 	# split the entire datasat into training and testing
-	training, testing = matched_timestamps.train_test_split(training_size=0.7, seed=None)
+	training, testing = matched_timestamps.train_test_split(training_size=0.70, seed=None)
 
-	# create a classfier using the trainging dataset
-	cvm = training.train_CVM()
+	# # create a classfier using the trainging dataset
+	svm = training.train_SVM()
 
-	# assigin the classifier to the testing dataset
-	testing.classifier = cvm
+	# # check accuracy of the testing dataset with training classifier
+	accuracy = training.accuracy_of_model()
+	print "accuracy of the training data is: " + str(accuracy)
 	
-	# check accuracy of the testing dataset with training classifier
+	# # assigin the classifier to the testing dataset
+	testing.classifier = svm
+	
+	# # check accuracy of the testing dataset with training classifier
 	accuracy = testing.accuracy_of_model()
 	print "accuracy of the testing data is: " + str(accuracy)
 	
+	# al's walk 2017-06-07
+	al_walk =  MatchedTimestamps()
+	al_walk.init_from_database('0117C59B07A4', 
+		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+		datetime(2017, 6, 28, 19, 40, 21, 0), datetime(2017, 6, 28, 19, 41, 10, 0), 
+		filter_length=15)
+	al_walk = al_walk.remove_nan()
+	al_walk.classifier = svm
+	print list(al_walk.predict())
+	al_walk.predict_proba()
 
-# 	plot all data
-	fig = plt.figure()
-	matched_timestamps.plot()
-	plt.show()
+	# plot all data
+	# fig = plt.figure()
+	# matched_timestamps.plot()
+	# plt.show()
