@@ -317,12 +317,9 @@ class MatchedTimestamps:
 
 	def _rename_label(self):
 		matched_timestamps_merged =  copy.deepcopy(self)
-		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['1-2'],'1-1')
-		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['1-4'],'1-3')
-		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['2-2'],'2-1')
-		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['2-4'],'2-3')	
-		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['3-2'],'3-1')
-		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['3-4'],'3-3')
+		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['1-2', '1-3','1-4'],'1-1')
+		matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['2-2', '2-3','2-4'],'2-1')
+		# matched_timestamps_merged.data_frame = matched_timestamps_merged.data_frame.replace(['3-2', '3-3','3-4'],'3-1')
 		return matched_timestamps_merged
 
 	def __repr__(self):
@@ -343,17 +340,17 @@ if __name__ == "__main__":
 	# 	datetime(2017, 6, 16, 23, 34, 04, 0), datetime(2017, 6, 16, 23, 41, 51, 0), 
 	# 	filter_length=20)
 
-	# # classification 5360 2017-06-27
-	# matched_timestamps.init_from_database('0117C59B07A4', 
-	# 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
-	# 	datetime(2017, 6, 27, 1, 00, 18, 0), datetime(2017, 6, 27, 23, 59, 18, 0), 
-	# 	filter_length=15)
+	# classification 5360 2017-06-27  3 aisles
+	matched_timestamps.init_from_database('0CF3EE0B0BDD', 
+		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+		datetime(2017, 6, 27, 1, 00, 18, 0), datetime(2017, 6, 27, 23, 59, 18, 0), 
+		filter_length=10)
 
 	# classification 2017-06-28 2 aisles
-	matched_timestamps.init_from_database('0117C59B07A4', 
-		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
-		datetime(2017, 6, 28, 19, 15, 04, 0), datetime(2017, 6, 28, 19, 35, 25, 0), 
-		filter_length=30)
+	# matched_timestamps.init_from_database('0117C59B07A4', 
+	# 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+	# 	datetime(2017, 6, 28, 19, 15, 04, 0), datetime(2017, 6, 28, 19, 35, 25, 0), 
+	# 	filter_length=10)
 
 	matched_timestamps = matched_timestamps.remove_nan()
 
@@ -377,15 +374,15 @@ if __name__ == "__main__":
 	print "accuracy of the testing data is: " + str(accuracy)
 	
 	# al's walk 2017-06-07
-	al_walk =  MatchedTimestamps()
-	al_walk.init_from_database('0117C59B07A4', 
-		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
-		datetime(2017, 6, 28, 19, 40, 21, 0), datetime(2017, 6, 28, 19, 41, 10, 0), 
-		filter_length=15)
-	al_walk = al_walk.remove_nan()
-	al_walk.classifier = svm
-	print list(al_walk.predict())
-	al_walk.predict_proba()
+	# al_walk =  MatchedTimestamps()
+	# al_walk.init_from_database('0117C59B07A4', 
+	# 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+	# 	datetime(2017, 6, 28, 19, 40, 21, 0), datetime(2017, 6, 28, 19, 41, 10, 0), 
+	# 	filter_length=15)
+	# al_walk = al_walk.remove_nan()
+	# al_walk.classifier = svm
+	# print list(al_walk.predict())
+	# al_walk.predict_proba()
 
 	# plot all data
 	# fig = plt.figure()
