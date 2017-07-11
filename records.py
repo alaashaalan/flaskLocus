@@ -98,10 +98,40 @@ class ListOfRecords(list):
 
 		return np.mean(self.get_rssis())
 
-
-	def filter(self, window=60):
+	def slope_filter(self):
 		rssis = []
 		timestamps = []
+		for record in self:
+			rssis.append(record.rssi)
+			timestamps.append(record.timestamp)
+		#Get all max dist between time stamps (1m/s)
+		#Then overwrite Rssis w/ filtered values
+		# plt.plot(rssis, 'r')
+		for count in range(1, len(rssis)):
+			curr_time = timestamps[count]
+			last_time = timestamps[count - 1]
+			time_delta = curr_time - last_time
+			#Max speed 1m/s therefore no need for unit conversion. Conv from date time to float
+			max_delta = time_delta.total_seconds()
+			if (max_delta == 0):
+				max_delta = 0.2
+			last_dist = helper_functions.rssi_to_meter(rssis[count-1])
+			rssis[count] = helper_functions.slope_limit_rssi(rssis[count], last_dist, max_delta )
+		# plt.plot(rssis,'b')
+		# plt.savefig('gif/' + str(record.gateway_id))
+		# plt.clf()
+		copy_of_records = copy.deepcopy(self)
+
+		for record, rssis in zip(copy_of_records, rssis ):
+			record.rssi = rssis
+		return copy_of_records
+
+
+	def filter(self, window=None):
+		rssis = []
+		timestamps = []
+		if window is None:
+			window = 0
 		for record in self:
 			rssis.append(record.rssi)
 			timestamps.append(record.timestamp)
@@ -160,13 +190,15 @@ class MatchedTimestamps:
 		self.classifier = classifier
 
 
-	def init_from_database(self, beacon, gateways, start, end, filter_length=None):
+	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=True):
 		self.gateway_list = gateways
 
 		all_data = {}
 		for gateway in gateways:
 			records = ListOfRecords()
 			records.from_database(beacon, gateway, start, end)
+			if slope_filter:
+				records = records.slope_filter() 
 			if filter_length is not None:
 				records = records.filter(filter_length)
 			records = records.average_per_second()
@@ -299,21 +331,40 @@ class MatchedTimestamps:
 
 		return training, testing
 
-	def plot(self):
+	def plot(self, ax):
 		"""hacky plotting for four categories and 3 gateways"""
-
-		ax = fig.add_subplot(111, projection='3d')
 		gateway_list = self.gateway_list
-		for label, c, m in zip(['1','2','3','4'], ['y', 'b', 'r', 'g'], ['x', '^', 'o', '*']):
+
+		labels = ['1-1 Control','1-2 Control','2-1 Control','2-2 Control']
+		for label, c, m in zip(labels, ['y', 'b', 'r', 'g'], ['x', '^', 'o', '*']):
+		# for label, c, m in zip(['Backwards Test'], ['y'], ['x']):
 			ts = self.data_frame.loc[self.data_frame['label'] == label]
 			xs = ts[gateway_list[0]].values
 			ys = ts[gateway_list[1]].values
 			zs = ts[gateway_list[2]].values
 			ax.scatter(xs, ys, zs, c=c, marker=m)
 
-		ax.set_xlabel('X Label')
-		ax.set_ylabel('Y Label')
-		ax.set_zlabel('Z Label')		
+		ax.legend(labels)
+		ax.set_xlabel(gateway_list[0])
+		ax.set_ylabel(gateway_list[1])
+		ax.set_zlabel(gateway_list[2])		
+
+
+	def plot_line(self, ax):
+		"""hacky plotting for four categories and 3 gateways"""
+		gateway_list = self.gateway_list
+		labels = ['Ideal Test']
+		for label, c, m in zip(labels, ['m'], ['x']):
+		# for label, c, m in zip(['Backwards Test'], ['y'], ['x']):
+			ts = self.data_frame.loc[self.data_frame['label'] == label]
+			xs = ts[gateway_list[0]].values
+			ys = ts[gateway_list[1]].values
+			zs = ts[gateway_list[2]].values
+			ax.plot(xs, ys, zs, label='parametric curve')
+
+		ax.set_xlabel(gateway_list[0])
+		ax.set_ylabel(gateway_list[1])
+		ax.set_zlabel(gateway_list[2])	
 
 	def _rename_label(self):
 		matched_timestamps_merged =  copy.deepcopy(self)
@@ -327,64 +378,91 @@ class MatchedTimestamps:
 		return self.data_frame.__repr__()
 		
 if __name__ == "__main__":
+	records = ListOfRecords()
+	records.init_from_database()
 
-	matched_timestamps =  MatchedTimestamps()
+	# matched_timestamps =  MatchedTimestamps()
 
-	# specify what beacon, gateway and timerange you're interested in
-	# filter length=None means no filter
-	# if you put filter=10 for example you will use moving average over 10 seconds
+	# # specify what beacon, gateway and timerange you're interested in
+	# # filter length=None means no filter
+	# # if you put filter=10 for example you will use moving average over 10 seconds
 
-	# classification 2017-06-16 4 groups
-	# matched_timestamps.init_from_database('0117C59B07A4', 
+	# # classification 2017-06-16 4 groups
+	# # matched_timestamps.init_from_database('0117C59B07A4', 
+	# # 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+	# # 	datetime(2017, 6, 16, 23, 34, 04, 0), datetime(2017, 6, 16, 23, 41, 51, 0), 
+	# # 	filter_length=20)
+
+	# # # classification 5360 2017-06-27  3 aisles
+	# # matched_timestamps.init_from_database('0CF3EE0B0BDD', 
+	# # 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+	# # 	datetime(2017, 6, 27, 1, 00, 18, 0), datetime(2017, 6, 27, 23, 59, 18, 0), 
+	# # 	filter_length=10)
+
+	# # classification 2017-06-28 2 aisles
+	# # matched_timestamps.init_from_database('0117C59B07A4', 
+	# # 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+	# # 	datetime(2017, 6, 28, 19, 15, 04, 0), datetime(2017, 6, 28, 19, 35, 25, 0), 
+	# # 	filter_length=10)
+
+	# # classification 2017-06-30 5630 training 
+	# matched_timestamps.init_from_database('0117C59B6221', 
 	# 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
-	# 	datetime(2017, 6, 16, 23, 34, 04, 0), datetime(2017, 6, 16, 23, 41, 51, 0), 
-	# 	filter_length=20)
+	# 	datetime(2016, 6, 30, 19, 50, 28, 0), datetime(2017, 6, 30, 20, 5, 53, 0), 
+	# 	filter_length=30, slope_filter=False)
 
-	# classification 5360 2017-06-27  3 aisles
-	matched_timestamps.init_from_database('0CF3EE0B0BDD', 
-		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
-		datetime(2017, 6, 27, 1, 00, 18, 0), datetime(2017, 6, 27, 23, 59, 18, 0), 
-		filter_length=10)
+	# matched_timestamps = matched_timestamps.remove_nan()
 
-	# classification 2017-06-28 2 aisles
-	# matched_timestamps.init_from_database('0117C59B07A4', 
-	# 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
-	# 	datetime(2017, 6, 28, 19, 15, 04, 0), datetime(2017, 6, 28, 19, 35, 25, 0), 
-	# 	filter_length=10)
-
-	matched_timestamps = matched_timestamps.remove_nan()
-
-	# matched_timestamps = matched_timestamps._rename_label() 
+	# # matched_timestamps = matched_timestamps._rename_label() 
 	
-	# split the entire datasat into training and testing
-	training, testing = matched_timestamps.train_test_split(training_size=0.70, seed=None)
+	# # split the entire datasat into training and testing
+	# training, testing = matched_timestamps.train_test_split(training_size=0.70, seed=None)
 
-	# # create a classfier using the trainging dataset
-	svm = training.train_SVM()
+	# # # create a classfier using the trainging dataset
+	# svm = training.train_SVM()
 
-	# # check accuracy of the testing dataset with training classifier
-	accuracy = training.accuracy_of_model()
-	print "accuracy of the training data is: " + str(accuracy)
+	# # # check accuracy of the testing dataset with training classifier
+	# accuracy = training.accuracy_of_model()
+	# print "accuracy of the training data is: " + str(accuracy)
 	
-	# # assigin the classifier to the testing dataset
-	testing.classifier = svm
+	# # # assigin the classifier to the testing dataset
+	# testing.classifier = svm
 	
-	# # check accuracy of the testing dataset with training classifier
-	accuracy = testing.accuracy_of_model()
-	print "accuracy of the testing data is: " + str(accuracy)
+	# # # check accuracy of the testing dataset with training classifier
+	# accuracy = testing.accuracy_of_model()
+	# print "accuracy of the testing data is: " + str(accuracy)
 	
-	# al's walk 2017-06-07
+	# # al's walk 2017-06-07
 	# al_walk =  MatchedTimestamps()
-	# al_walk.init_from_database('0117C59B07A4', 
+	# # al_walk.init_from_database('0117C59B07A4', 
+	# # 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+	# # 	datetime(2017, 6, 28, 19, 40, 21, 0), datetime(2017, 6, 28, 19, 41, 10, 0), 
+	# # 	filter_length=15)
+
+	# # # backward test walk test
+	# # al_walk.init_from_database('0117C59B6221', 
+	# # 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
+	# # 	datetime(2017, 6, 30, 20, 8, 12, 0), datetime(2017, 7, 3, 20, 8, 12, 0), 
+	# # 	filter_length=None, slope_filter=False)
+
+	# # ideal test walk test
+	# al_walk.init_from_database('0117C59B6221', 
 	# 	['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
-	# 	datetime(2017, 6, 28, 19, 40, 21, 0), datetime(2017, 6, 28, 19, 41, 10, 0), 
-	# 	filter_length=15)
+	# 	datetime(2017, 6, 30, 20, 7, 14, 0), datetime(2017, 6, 30, 20, 8, 10, 0), 
+	# 	filter_length=None, slope_filter=True)
+
+
 	# al_walk = al_walk.remove_nan()
 	# al_walk.classifier = svm
 	# print list(al_walk.predict())
 	# al_walk.predict_proba()
 
-	# plot all data
+	# # plot all data
 	# fig = plt.figure()
-	# matched_timestamps.plot()
+	# ax = fig.add_subplot(111, projection='3d')
+	# matched_timestamps.plot(ax)
+
+	# # plot walk data
+	# # fig = plt.figure()
+	# al_walk.plot_line(ax)
 	# plt.show()
