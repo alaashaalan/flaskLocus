@@ -40,22 +40,6 @@ def slope_limit_rssi(current_rssi, last_distance, max_delta_distance):
 	return new_rssi
 
 
-def timestamp_matching():
-	"""
-	TODO: this needs to be scheduled somehow.
-	"""
-	start_time = datetime.datetime.now() - datetime.timedelta(days=1)
-	end_time = datetime.datetime.now()
-	tag_id = "0CF3EE0B0BDD"
-	gateway_ids = ["D897B89C7B2F","FF9AE92EE4C9","CD2DA08685AD"]
-
-	start_time = datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
-	end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
-
-	result = trilateration_mysql.timestamp_matching(start_time, end_time, tag_id, gateway_ids)
-	return  str(result)
-
-
 
 # this is only executed if called explicitly. For debugging purposes only
 if __name__ == "__main__":

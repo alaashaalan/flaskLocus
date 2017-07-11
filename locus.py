@@ -28,9 +28,7 @@ class Location:
 
 
 	def trilaterate(self):
-		pass
-
-
+		raise NotImplementedError
 
 
 class Gateway:
@@ -42,38 +40,11 @@ class Gateway:
 	def to_point(self):
 		return trilateration2d.point(self.x, self.y)
 
+
 class Beacon:
 	# raise NotImplementedError
 	pass
 
-
-
-# class Record:
-# 	"""
-# 	not implemented yet
-# 	"""
-# 	def __init__(self, timestamp, tag_id, gateway_id, rssi, raw_packet_content, label=None):
-# 		self.timestamp = timestamp
-# 		self.tag_id = tag_id
-# 		self.gateway_id = gateway_id
-# 		self.rssi = rssi
-# 		self.raw_packet_content = raw_packet_content
-# 		self.label = label
-
-# 		self.table = None
-# 		self.database, self.cursor = connection()
-
-		
-# 	def save(self, table):
-# 		insert_statement = (
-# 			"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, label)"
-# 			"VALUES (%s, %s, %s, %s, %s, %s)"
-# 			)
-# 		data = (self.time_stamp, self.tag_id, self.gateway_id, self.rssi, self.raw_packet_content, self.label)
-
-# 		self.cursor.execute(insert_statement, data)
-# 		database.commit()
-# 		database.close()
 
 if __name__ == '__main__':
 	lab = Location('location.json')
