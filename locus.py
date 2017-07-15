@@ -42,8 +42,7 @@ class Gateway:
 
 
 class Beacon:
-	# raise NotImplementedError
-	pass
+	raise NotImplementedError
 
 
 if __name__ == '__main__':
