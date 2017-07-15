@@ -28,7 +28,8 @@ def insert_message(message):
 	message = message.split(',')
 	database, cursor = connection()
 	label = get_app_label()
-	time_stamp = datetime.fromtimestamp(int(message[5])).strftime('%Y-%m-%d %H:%M:%S')
+	ntp_timestamp = int(message[5])
+	time_stamp = datetime.fromtimestamp(ntp_timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
 	insert_statement = (
 		"INSERT INTO raw_data (time_stamp, tag_id, gateway_id, rssi, raw_packet_content, ntp, label)"
@@ -59,67 +60,6 @@ def insert_multiple_messages(messages):
 	messages = messages.split('\n')
 	for message in messages:
 		insert_message(message)
-
-
-
-def find_avg_rssi(start_time, end_time, beacon, gateway):
-	"""
-	time in the following format: '2017-05-01 17:30:20'
-	TODO: should we pass connection and cursor as arguments instead of openning every time?
-	"""
-	database, cursor = connection()
-	select_statement = (
-		"SELECT rssi FROM  raw_data " 
-		"WHERE time_stamp >= %s AND "
-		"time_stamp <= %s AND " 
-		"tag_id = %s AND " 
-		"gateway_id = %s")
-	data = (start_time, end_time, beacon, gateway)
-	cursor.execute(select_statement, data)
-	rssis = cursor.fetchall()
-	if len(rssis) == 0:
-		avg_rssi = 0
-	else:
-		avg_rssi = np.average(rssis)
-	database.close()
-	return avg_rssi
-
-
-# Finds specific beacons based on their id from raw_data table
-'''
-TODO: SQL Function input sanitization
-'''
-def find_by_tag_id(table_name, fields, tag_id):
-	database, cursor = connection()
-	query ="SELECT {} FROM {} WHERE tag_id = {}".format(fields, table_name, '%s')
-	cursor.execute(query, [tag_id])
-	records = cursor.fetchall()
-	database.close()
-
-	return records
-
-# Finds all records between a specific time frame for a specific table (STRING INPUTS)
-def find_by_datetime_range(table_name, fields, time_stamp_start, time_stamp_end):
-	database, cursor = connection()
-	query = "SELECT {} FROM {} WHERE time_stamp >= {} AND time_stamp <= {}".format(fields, table_name, '%s', '%s')
-	cursor.execute(query, [time_stamp_start, time_stamp_end])
-	records = cursor.fetchall()
-	database.close()
-
-	return records
-
-
-# Needs to be updated to SQL
-def convert_to_csv(list_of_records):
- 	csv_result = ""
- 	for row in list_of_records:
- 		try:
- 			csv_result += ','.join([row['time_stamp'], row['report_type'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content']]) + '\n'
- 		except KeyError, e:
- 			csv_result += ','.join(['', row['report_type'], row['tag_id'], row['gateway_id'], row['rssi'], row['raw_packet_content']]) + '\n'
- 
-
- 	return csv_result
 
 
 def set_app_state(status, label):
