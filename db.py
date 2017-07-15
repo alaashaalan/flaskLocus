@@ -48,6 +48,15 @@ def validate_message(message):
 		return True
 	else:
 		return False
+def find_by_tag_id_gateway_id_date_range(table_name, fields, tag_id, gateway_id, start_time, end_time):
+	database, cursor = connection()
+	query ="SELECT {} FROM {} WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format(fields, table_name, '%s', '%s', '%s', '%s')
+	cursor.execute(query, [tag_id, gateway_id, start_time, end_time])
+	records = cursor.fetchall()
+	database.close()
+
+	return records
+
 
 
 def insert_multiple_messages(messages):
