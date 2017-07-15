@@ -5,6 +5,7 @@ import datetime
 import celery_app
 import trilateration_mysql
 from config import celery_config
+from data_process import run_SVM
 
 
 app = Flask(__name__)
@@ -46,7 +47,7 @@ def intake():
 		data = request.get_data()
 		db.insert_multiple_messages(data)
 	return (data + '\n', 200)
-
+'''
 @app.route('/training_setup', methods=['POST', 'GET'])
 def training_setup():
 	return render_template('training_setup.html')
@@ -68,10 +69,10 @@ def training_result():
 	gateway_id = gateway_id.split(',')
 
 	# Train SVM and check results
-
+	run_SVM(beacon_id, gateway_id, start_date, end_date, filter_window, testing_label)
 
 	return render_template('training_result.html')
-
+'''
 
 @app.route( '/timestamp_matching' , methods=[ 'GET']) 
 def daily_processing():

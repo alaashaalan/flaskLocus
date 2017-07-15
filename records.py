@@ -63,10 +63,13 @@ class ListOfRecords(list):
 		raise NotImplementedError
 
 
-	def init_from_database(self, beacon, gateways, start, end):
+	def init_from_database(self, beacon, gateways, start, end, label=None):
 		database, cursor = db.connection()
 		# query = "SELECT * FROM test_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
-		query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
+		if label == None:
+			query = "SELECT * FROM raw_data WHERE tag_id = {} AND label={}".format('%s', '%s', '%s', '%s','%s')
+		else:
+			query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
 
 		cursor.execute(query, [beacon, gateways, start, end])
 		records = cursor.fetchall()
@@ -188,13 +191,13 @@ class MatchedTimestamps:
 		self.classifier = classifier
 
 
-	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=False):
+	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=False, label=None):
 		self.gateway_list = gateways
 
 		all_data = {}
 		for gateway in gateways:
 			records = ListOfRecords()
-			records.from_database(beacon, gateway, start, end)
+			records.init_from_database(beacon, gateway, start, end, label)
 			if slope_filter:
 				records = records.slope_filter() 
 			if filter_length is not None:
