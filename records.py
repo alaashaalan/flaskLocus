@@ -194,7 +194,7 @@ class MatchedTimestamps:
 		all_data = {}
 		for gateway in gateways:
 			records = ListOfRecords()
-			records.from_database(beacon, gateway, start, end)
+			records.init_from_database(beacon, gateway, start, end)
 			if slope_filter:
 				records = records.slope_filter() 
 			if filter_length is not None:
