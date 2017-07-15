@@ -17,19 +17,19 @@ def credentials():
 	return db_credentials
 
 # All times are in UTC
-# def celery_config(app):
-# 	app.config.update(
-# 		ENABLE_UTC=True,
-# 		Timezone='UTC',
-# 		CELERY_BROKER_URL='amqp://guest:guest@localhost:5672//',
-# 		CELERY_RESULT_BACKEND='amqp://',
+def celery_config(app):
+	app.config.update(
+		ENABLE_UTC=True,
+		Timezone='UTC',
+		CELERY_BROKER_URL='amqp://guest:guest@localhost:5672//',
+		CELERY_RESULT_BACKEND='amqp://',
 
-# 		CELERYBEAT_SCHEDULE={
-# 			'celery_timestamp_matching': {
-# 				'task': 'celery_timestamp_matching',
-# 				'schedule': crontab(hour=5, minute=0)
-# 			}
-# 		}
-# 	)
+		CELERYBEAT_SCHEDULE={
+			'celery_timestamp_matching': {
+				'task': 'celery_timestamp_matching',
+				'schedule': crontab(hour=5, minute=0)
+			}
+		}
+	)
 
-# 	return
+	return
