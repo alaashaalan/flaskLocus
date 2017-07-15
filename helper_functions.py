@@ -1,7 +1,6 @@
 from __future__ import division
 import math
 import db
-import trilateration_mysql
 import datetime
 
 RSSI_1M = -60
