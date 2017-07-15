@@ -46,6 +46,31 @@ def intake():
 		db.insert_multiple_messages(data)
 	return (data + '\n', 200)
 
+@app.route('/training_setup', methods=['POST', 'GET'])
+def training_setup():
+	return render_template('training_setup.html')
+
+@app.route('/training_result', methods=['POST'])
+def training_result():
+	# Collect data from request form (ASSUMES IS PROPER DATA)
+	start_date = request.form['start_date']
+	end_date = request.form['end_date']
+	beacon_id = request.form['beacon_id']
+	gateway_id = request.form['gateway_id']
+	filter_window = request.form['filter_window']
+	test_label = request.form['test_label']
+
+
+	# Process Data into correct form to run SVM
+	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
+	gateway_id = gateway_id.split(',')
+
+	# Train SVM and check results
+
+
+	return render_template('training_result.html')
+
 
 @celery.task(name='celery_timestamp_matching')
 def celery_timestamp_matching():

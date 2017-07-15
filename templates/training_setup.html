@@ -1,0 +1,15 @@
+<html>
+   <body>
+   
+      <form action = "{{ url_for('training_result') }}" method = "POST">
+         <p>Start Date <input type = "datetime-local" value = "2017-06-01 08:30:20" name= "start_date" /></p>
+         <p>End Date <input type = "datetime-local" name = "end_date" value = "2017-07-01 08:30:15" /></p>
+         <p>Beacon Id <input type = "text" name = "beacon_id" /></p>
+         <p>Gateway Ids <input type ="text" name = "gateway_id" style='width:750px' value = "EDC36C497B43,DB994C10DF07,EE5A181D4A27,C9827BC63EE9, D06A1A8F44DA,EF4DCFA41F7E" /></p>
+         <p>Filter Window <input type ="number" name = "filter_window" min=1 /></p>
+         <p>Testing Label <input type ="text" name = "test_label" /></p>
+         <p><input type = "submit" value = "submit" /></p>
+      </form>
+      
+   </body>
+</html>
