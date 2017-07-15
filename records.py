@@ -9,7 +9,7 @@ from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+#from mpl_toolkits.mplot3d import Axes3D
 
 
 import db
@@ -397,7 +397,17 @@ class MatchedTimestamps:
 			#print rssis
 		print "replaced",numb_of_nan,"elements containing NaN" 
 
-			
+	def get_labels(self):
+		a = np.array(self.data_frame['label'])
+		#a = set(a)
+		seen = set()
+		result = []
+		for item in a:
+			if item not in seen:
+				seen.add(item)
+				result.append(item)
+		return result
+
 
 	def _rename_label(self):
 		matched_timestamps_merged =  copy.deepcopy(self)
@@ -409,28 +419,69 @@ class MatchedTimestamps:
 	def __repr__(self):
 
 		return self.data_frame.__repr__()
+
+
 		
 if __name__ == "__main__":
-	# EXAMPLE:
+	pd.options.mode.chained_assignment = None  # default='warn'
+
+	matched_timestamps =  MatchedTimestamps()
 
 	# specify what beacon, gateway and timerange you're interested in
 	# filter length=None means no filter
 	# if you put filter=10 for example you will use moving average over 10 seconds
-	matched_timestamps =  MatchedTimestamps()
-	matched_timestamps.init_from_database('1', 
-		['1', '2', '3'], 
-		datetime(2017, 7, 13, 19, 40, 0), datetime(2017, 7, 13, 19, 40, 1), 
-		filter_length=None)
+	matched_timestamps.init_from_database('0CF3EE0B0BDD', 
+		['EDC36C497B43', 'DB994C10DF07', 'EE5A181D4A27', 'C9827BC63EE9', 'D06A1A8F44DA', 'EF4DCFA41F7E'], 
+		datetime(2016, 6, 29, 22, 00, 18, 0), datetime(2017, 7, 10, 23, 17, 22, 0), 
+		filter_length=3)
 
-	# print processed matched timestamp table
-	print matched_timestamps.data_frame
-
+	matched_timestamps.two_d_plot('training')
+	matched_timestamps.replace_nan()
+	matched_timestamps = matched_timestamps.remove_nan()
 	matched_timestamps.standardize()
-	matched_timestamps.train_SVM()
+	matched_timestamps.two_d_plot('scaled_training')
 
-	# predict itself
-	print matched_timestamps.predict()
+	# split the entire datasat into training and testing
+	training, testing = matched_timestamps.train_test_split(training_size=0.5, seed=None)
+
+	labels = matched_timestamps.get_labels()
+	# create a classfier using the trainging dataset
+	svm = training.train_SVM()
 
 
+
+	# check accuracy of the training dataset with training classifier
+	accuracy = training.accuracy_of_model()
+	print "accuracy of the training data is: " + str(accuracy)
+
+
+	# assigin the classifier to the testing dataset
+	testing.classifier = svm
 	
-	# print matched_timestamps.train_SVM()
+	# check accuracy of the testing dataset with training classifier
+	accuracy = testing.accuracy_of_model()
+	print "accuracy of the testing data is: " + str(accuracy)
+	
+	#specify what beacon, gateway and timerange you're interested in
+	#filter length=None means no filter
+	#if you put filter=10 for example you will use moving average over 10 seconds
+	al_walk = MatchedTimestamps()
+	al_walk.init_from_database('0CF3EE0B0BDD', 
+		['EDC36C497B43', 'DB994C10DF07', 'EE5A181D4A27', 'C9827BC63EE9', 'D06A1A8F44DA', 'EF4DCFA41F7E'], 
+		datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0), 
+		filter_length=3)
+	al_walk.two_d_plot('testing')
+	al_walk.replace_nan()
+	al_walk = al_walk.remove_nan()
+	al_walk.standardize()
+	al_walk.two_d_plot('scaled_testing')
+	al_walk.classifier = svm
+	prediction = al_walk.predict()
+	
+	probabilites = al_walk.predict_proba()
+	print probabilites
+	#datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0),
+
+	prediction = helper_functions.path_rules(prediction, probabilites,labels)
+	print prediction
+
