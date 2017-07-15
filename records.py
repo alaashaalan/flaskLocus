@@ -309,7 +309,7 @@ class MatchedTimestamps:
 
 	def predict(self):
 		data = np.array(self.data_frame[self.gateway_list])
-		print self.classifier.predict(data)
+		return self.classifier.predict(data)
 
 	def predict_proba(self):
 		data = np.array(self.data_frame[self.gateway_list])
@@ -458,7 +458,7 @@ if __name__ == "__main__":
 	al_walk = MatchedTimestamps()
 	al_walk.init_from_database('0CF3EE0B0BDD', 
 		['EDC36C497B43', 'DB994C10DF07', 'EE5A181D4A27', 'C9827BC63EE9', 'D06A1A8F44DA', 'EF4DCFA41F7E'], 
-		datetime(2017, 7, 11, 21, 15, 28, 0), datetime(2017, 7, 12, 21, 15, 28, 0), 
+		datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0), 
 		filter_length=3)
 	al_walk.two_d_plot('testing')
 	al_walk.replace_nan()
@@ -466,8 +466,8 @@ if __name__ == "__main__":
 	al_walk.standardize()
 	al_walk.two_d_plot('scaled_testing')
 	al_walk.classifier = cvm
-	prediction = []
-	prediction.append(al_walk.predict())
+	prediction = al_walk.predict()
+	
 	probabilites = al_walk.predict_proba()
 	#print probabilites
 #datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0),
