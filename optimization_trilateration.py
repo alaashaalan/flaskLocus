@@ -55,6 +55,36 @@ def plotting(locations, distances, found_location):
 		circ=plt.Circle(loc, radius=dist, color='g', fill=False)
 		ax.add_patch(circ)
 
+# def path_fit(self, found_location):
+# 	a = [0,0]
+# 	b = [10,0]
+# 	c = [0,10]
+# 	abc = []
+# 	x = 0
+# 	y = 0
+# 	while (x < 10):
+# 		abc.append(x,y)  
+# 		x= x+.05
+# 	while(y < 10):
+# 		abc.append(x.y)
+# 		x = x - .05
+# 		y = y + .05
+# 	while(y>=0):
+# 		abc.append(x,y)
+# 		y = y - .05
+# return fitted_location
+
+def plot_trilaterate(locations, distances, found_location):
+	fig=plt.figure(1)
+	plt.axis([-15,35,-15,35])
+	ax=fig.add_subplot(1,1,1)
+
+	circ=plt.Circle(found_location, radius=0.2, color='r', fill=True)
+	#ax.add_patch(circ)
+
+	for dist, loc in zip(distances, locations):
+		circ=plt.Circle(loc, radius=dist, color='g', fill=False)
+		#ax.add_patch(circ)
 
 if __name__ == "__main__":
 	locations = [ (0,0), (0,10), (5,5)]

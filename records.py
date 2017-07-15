@@ -5,6 +5,8 @@ import pandas as pd
 
 from sklearn.neural_network import MLPClassifier
 from sklearn import svm
+from sklearn import preprocessing
+from sklearn.preprocessing import Imputer
 
 import matplotlib.pyplot as plt
 #from mpl_toolkits.mplot3d import Axes3D
@@ -14,7 +16,7 @@ import db
 import helper_functions
 import optimization_trilateration
 import locus
-
+import itertools
 
 class Record:
 	def __init__(self, timestamp=None, tag_id=None, gateway_id=None, rssi=None, raw_packet_content=None, label=None, ntp=None):
@@ -125,15 +127,20 @@ class ListOfRecords(list):
 			timestamps.append(record.timestamp)
 		#Get all max dist between time stamps (1m/s)
 		#Then overwrite Rssis w/ filtered values
+		fig=plt.figure(1)
 		plt.plot(rssis, 'r')
+		old_max_delta = 0
 		for count in range(1, len(rssis)):
 			curr_time = timestamps[count]
 			last_time = timestamps[count - 1]
 			time_delta = curr_time - last_time
 			#Max speed 1m/s therefore no need for unit conversion. Conv from date time to float
 			max_delta = time_delta.total_seconds()
+			if (max_delta == 1) and (old_max_delta ==0.5):
+				max_delta = 0.5
 			if (max_delta == 0):
-				max_delta = 0.2
+				max_delta = 0.5
+			old_max_delta = max_delta
 			last_dist = helper_functions.rssi_to_meter(rssis[count-1])
 			rssis[count] = helper_functions.slope_limit_rssi(rssis[count], last_dist, max_delta )
 		plt.plot(rssis,'b')
@@ -197,10 +204,11 @@ class MatchedTimestamps:
 		for gateway in gateways:
 			records = ListOfRecords()
 			records.from_database(beacon, gateway, start, end)
-			records = records.slope_filter()
+			#records = records.slope_filter()
 			if filter_length is not None:
 				records = records.filter(filter_length)
 			records = records.average_per_second()
+
 			all_data[gateway] = records
 
 		data_frame = self._match_by_time(all_data)
@@ -345,28 +353,87 @@ class MatchedTimestamps:
 		ax.set_ylabel('Y Label')
 		ax.set_zlabel('Z Label')		
 
+	def two_d_plot(self, filename):
+		"""hacky plotting for four categories and 3 gateways"""
+		colors = itertools.cycle(["r", "b", "g", "k", "m", "y"])
+		gateway_list = self.gateway_list
+		for gateway in gateway_list:
+			plt.plot(self.data_frame[gateway],color=next(colors))
+		plt.savefig('gif/'+str(filename))
+		plt.clf()
 
+	def standardize(self):
+		gateway_list=self.gateway_list
+		for gateway in gateway_list:
+			scaled = preprocessing.scale(self.data_frame[gateway])
+			self.data_frame[gateway] = scaled
+
+
+	# def replace_nan_imputer(self):
+	# 	imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+	# 	gateway_list=self.gateway_list
+	# 	for gateway in gateway_list:
+	# 		imputed = imp.fit_transform(self.data_frame[gateway])
+	# 		self.data_frame[gateway] = imputed
+	def replace_nan(self):
+		gateway_list=self.gateway_list
+		numb_of_nan=0
+		i=2
+		for gateway in gateway_list:
+			rssis = self.data_frame[gateway]
+			if np.isnan(rssis[0]):
+				rssis[0] = -60
+			for row in range(1, (len(rssis)-1)):
+				if np.isnan(rssis[row]):
+					#print rssis[row]
+					numb_of_nan = numb_of_nan+1
+					last_value = rssis[row-1]
+					#print last_value
+					next_value = rssis[row+1]
+					while np.isnan(next_value):
+						if ((row+i)< len(rssis)):
+							next_value = rssis[row+i]
+							i = i+1
+						else: next_value= last_value
+					i = 2
+					#print next_value
+					rssis[row] = (last_value + next_value)/2
+					#print rssis[row]
+			self.data_frame[gateway] = rssis
+			if np.isnan(rssis[row+1]):
+				rssis[row+1] = rssis[row]
+			#print rssis
+		print "replaced",numb_of_nan,"elements containing NaN" 
+
+			
+
+		
 	def __repr__(self):
 
 		return self.data_frame.__repr__()
 		
 if __name__ == "__main__":
 
+	pd.options.mode.chained_assignment = None  # default='warn'
+
 	matched_timestamps =  MatchedTimestamps()
 
 	# specify what beacon, gateway and timerange you're interested in
 	# filter length=None means no filter
 	# if you put filter=10 for example you will use moving average over 10 seconds
-	matched_timestamps.init_from_database('0117C59B6221', 
-		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
-		datetime(2016, 6, 29, 22, 00, 18, 0), datetime(2017, 6, 30, 20, 06, 0, 0), 
-		filter_length=5)
+	matched_timestamps.init_from_database('0CF3EE0B0BDD', 
+		['EDC36C497B43', 'DB994C10DF07', 'EE5A181D4A27', 'C9827BC63EE9', 'D06A1A8F44DA', 'EF4DCFA41F7E'], 
+		datetime(2016, 6, 29, 22, 00, 18, 0), datetime(2017, 7, 10, 23, 17, 22, 0), 
+		filter_length=3)
 
-
+	matched_timestamps.two_d_plot('training')
+	matched_timestamps.replace_nan()
 	matched_timestamps = matched_timestamps.remove_nan()
-	
+	matched_timestamps.standardize()
+	matched_timestamps.two_d_plot('scaled_training')
+
 	# split the entire datasat into training and testing
-	training, testing = matched_timestamps.train_test_split(training_size=0.7, seed=None)
+	training, testing = matched_timestamps.train_test_split(training_size=0.5, seed=None)
 
 	# create a classfier using the trainging dataset
 	cvm = training.train_CVM()
@@ -385,28 +452,52 @@ if __name__ == "__main__":
 	
 
 
-	# specify what beacon, gateway and timerange you're interested in
-	# filter length=None means no filter
-	# if you put filter=10 for example you will use moving average over 10 seconds
+	#specify what beacon, gateway and timerange you're interested in
+	#filter length=None means no filter
+	#if you put filter=10 for example you will use moving average over 10 seconds
 	al_walk = MatchedTimestamps()
-	al_walk.init_from_database('0117C59B6221', 
-		['CD2DA08685AD', 'FF9AE92EE4C9', 'D897B89C7B2F'], 
-		datetime(2017, 6, 30, 20, 8, 12, 0), datetime(2017, 7, 3, 20, 8, 12, 0), 
-		filter_length=10)
-
+	al_walk.init_from_database('0CF3EE0B0BDD', 
+		['EDC36C497B43', 'DB994C10DF07', 'EE5A181D4A27', 'C9827BC63EE9', 'D06A1A8F44DA', 'EF4DCFA41F7E'], 
+		datetime(2017, 7, 11, 21, 15, 28, 0), datetime(2017, 7, 12, 21, 15, 28, 0), 
+		filter_length=3)
+	al_walk.two_d_plot('testing')
+	al_walk.replace_nan()
 	al_walk = al_walk.remove_nan()
+	al_walk.standardize()
+	al_walk.two_d_plot('scaled_testing')
 	al_walk.classifier = cvm
-	al_walk.predict()
+	prediction = []
+	prediction.append(al_walk.predict())
 	probabilites = al_walk.predict_proba()
+	#print probabilites
+#datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0),
 
-	probability = []
-	for item in probabilites:
-		probability.append(max(item))
+	print prediction
 
-	print probability
-# 	plot all data
-	# fig = plt.figure()
-	# matched_timestamps.plot()
-	# plt.show()
+	# for item in range(1,len(probabilites)):
+	# 	if (prediction[item] == '1-1' and prediction[item+1]=='2-2') or (prediction[item] == '2-2' and prediction[item+1]=='1-1'):
+	# 		prob = probabilites[item]
+	# 		if prob[2] >= prob[3]:
+	# 			prediction[item+1] = '1-2' 
+	# 		else:
+	# 			prediction[item+1] = '2-1'
+	# 	if (prediction[item] == '2-2' and prediction[item+1]=='1-2') or (prediction[item] == '1-2' and prediction[item+1]=='2-2'):
+	# 		prob = probabilites[item]
+	# 		if prob[1] >= prob[4]:
+	# 			prediction[item+1] = '1-1' 
+	# 		else:
+	# 			prediction[item+1] = '2-2'
 
-	#datetime(2017, 6, 30, 20, 06, 18, 0), datetime(2017, 6, 30, 20, 8, 12, 0), 
+	# print prediction
+
+
+
+	# probability = []
+	# for item in probabilites:
+	# 	probability.append(item)
+	# print probability
+
+	# print len(probability)
+	# print len(probabilites)
+
+	

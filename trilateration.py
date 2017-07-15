@@ -10,9 +10,18 @@ import helper_functions
 import locus
 import trilateration2d
 import optimization_trilateration
+import trilateration_mysql
 
 MIN_NUMBER_OF_GATEWAYS_FOR_TRIANGULATION = 3
 AVERAGING_WINDOW = 5
+
+class point(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def to_array(self):
+        return [self.x, self.y]
 
 class Trilateration():
 	def __init__(self, location, beacon_id, gateway_ids, start_time, end_time):
@@ -33,6 +42,11 @@ class Trilateration():
 
 
 	def trilaterate(self):
+		
+														#get time delta for all 
+		# for gateway in self.gateway_ids:
+		# 	self._get_deltas(self.data_per_gateway[gateway])
+
 		# run slope limitation & remove outliers
 		for gateway in self.gateway_ids:
 			self._slope_filter(self.data_per_gateway[gateway])
@@ -40,7 +54,7 @@ class Trilateration():
 
 		# smooth rssi using running average
 		for gateway in self.gateway_ids:
-			print gateway
+			#print gateway
 			new_rssi_list = []
 			for ind, record in enumerate(self.data_per_gateway[gateway]):
 				rssi = record[3]
@@ -54,7 +68,7 @@ class Trilateration():
 			plt.plot(new_rssi_list)
 			plt.figure(1)
 
-			print self._moving_average(self.data_per_gateway[gateway], AVERAGING_WINDOW)
+			self._moving_average(self.data_per_gateway[gateway], AVERAGING_WINDOW)
 
 
 		# create a dictionary of matched timestamps
@@ -63,10 +77,8 @@ class Trilateration():
 		# get coordinates of all base stations
 		gateway_coordinates = []
 		for gateway in self.location.list_of_gateways:
-			gateway_coordinates.append(gateway.to_point().to_array())
-		
-
-		# print gateway_coordinates
+			#gateway_coordinates.append(gateway.to_point())
+			gateway_coordinates.append(gateway.to_point().to_array())         #this one for optimization
 
 		locations = []	
 		images = []
@@ -88,7 +100,13 @@ class Trilateration():
 					distances.append(helper_functions.rssi_to_meter(rssi))
 			# print distances
 
-			# center = trilateration2d.trilateration(gateway_coordinates, distances)
+			#print(gateway_coordinates)
+
+
+			# actual trilateration
+			#center = trilateration_mysql.trilateration(gateway_coordinates, distances)
+			
+			# r2 approx. 
 			center = optimization_trilateration.trilaterate(gateway_coordinates, distances)
 			# print center
 			
@@ -97,7 +115,9 @@ class Trilateration():
 			# plt.ion()
 			# plt.show()
 			plt.clf()
-			optimization_trilateration.plotting(gateway_coordinates, distances, center)
+			optimization_trilateration.plotting(gateway_coordinates, distances, center)		#r2 optimized plotting
+			#optimization_trilateration.plot_trilaterate(gateway_coordinates, distances, center)
+
 			# plt.plot([5, 5], [0, 10], color='k', linestyle='-', linewidth=1)
 			plt.legend(distances)
 
@@ -122,6 +142,49 @@ class Trilateration():
 				timestamps.add(row[0])
 
 		return sorted(timestamps)
+
+	# def _get_deltas(self, records):
+
+	# 	timestamps = []
+	# 	delta = []
+
+	# 	for record in records:					
+	# 		timestamps.append(record[0])
+
+	# 	for count in range(1, len(timestamps)):
+	# 		curr_time = timestamps[count]
+	# 		last_time = timestamps[count - 1]
+	# 		time_delta = curr_time - last_time
+	# 		#Max speed 1m/s therefore no need for unit conversion. Conv from date time to float
+	# 		max_delta = time_delta.total_seconds()
+	# 		delta.append(max_delta)
+
+	# 	print(len(delta))
+	# 	for count in range(len(delta) - 1):
+	# 		i = 1
+	# 		#get numb of adv in this second
+	# 		if (delta[count+1] == 0):
+	# 			while (delta[count+i] == 0):
+	# 				if ((count+i+1) >= len(delta)):
+	# 					print("end")
+	# 					break
+	# 				print(count)
+	# 				print(i)
+	# 				i = i+1
+	# 			num_per_sec = i 
+	# 			delt = 1 / num_per_sec
+	# 		#assign delta values to the second
+	# 		while (i >= 1):
+	# 			delta[(count + i - 1) ] = delt
+	# 			i = i -1
+		
+	# 													#need to modify this to create a new column
+
+	# 	for time_deltas, record in zip(timestamps, records):
+	# 		record[0] = time_deltas			
+
+
+
 
 	def _slope_filter(self, records):
 		rssis = []
@@ -190,50 +253,19 @@ class Trilateration():
 		return rssi_per_second
 
 
-	# def timestamp_matching(self):
-	# 	x_y_coordinates = {}
-	# 	for timestamp in self.find_unique_timestamps():
-			
 
-		# 	for gateway in self.gateway_ids:
-			# 	print gateway
-			# 	rssis_for_this_second[gateway] = []
-			# 	for record in self.data_per_gateway[gateway]:
-			# 		if record[0] >= timestamp and record[0] <= timestamp:
-			# 			rssis_for_this_second[gateway].append(record[3])
-			# 			print rssis_for_this_second[gateway]
-
-			# 	if len(rssis_for_this_second[gateway]) == 0:
-			# 		print 'found zero rssis for this gateway for this second! scipping this timestamp'
-			# 		break
-			# 	else:
-			# 		rssis_for_this_second[gateway] = np.average(rssis_for_this_second[gateway])
-			# 	print rssis_for_this_second[gateway]
-
-			# print len(rssis_for_this_second), len(self.gateway_ids)
-			# if len(rssis_for_this_second) != len(self.gateway_ids):
-			# 	print "couldn't find matching timestamps for all gateways"
-			# 	continue
-			# else:
-			# 	averaged_rssis_for_this_second = []
-			# 	for gateway in self.gateway_ids:
-			# 		averaged_rssis_for_this_second.append(rssis[gateway])
-
-			# 	self.matched_timestamps.append([timestamp] + averaged_rssis_for_this_second)
 
 
 if __name__ == '__main__':
 
-	location = locus.Location('location_park.json')
-	print location.list_of_beacons[0]
-	print location.list_of_beacons[1]
-	print location.list_of_beacons[2]
-	print location.list_of_beacons[3]
-	
+	#location = locus.Location('location_park.json')
 
+	
+	location = locus.Location('location_park.json')
 
 	beacon = location.list_of_beacons[3]
 	gateway_ids = location.get_all_gateway_ids()
+
 
 	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 5, 29, 16, 48, 00), datetime.datetime(2017, 5, 29, 16, 54, 59))
 	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 02, 00, 00, 00), datetime.datetime(2017, 6, 03, 16, 54, 59))
@@ -244,18 +276,11 @@ if __name__ == '__main__':
 
 
 	# park second test try:
-	a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 03, 00, 10, 00), datetime.datetime(2017, 6, 03, 00,11, 54))
+	a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 03, 00, 10, 00), datetime.datetime(2017, 6, 03, 00 ,12, 00))
 
-
+	#a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 6, 02, 23, 37, 00), datetime.datetime(2017, 6, 02, 23 ,45, 00))
 	# a = Trilateration(location, beacon, gateway_ids, datetime.datetime(2017, 5, 30, 12, 01, 59), datetime.datetime(2017, 5, 30, 12, 02, 32))
 
-	# print(a.data_per_gateway[gateway_ids[0]])     
-	# print a.find_unique_timestamps()
-	# print a._records_for_second()
-	# a.plot_rssis(gateway_ids[0])
-	# plt.figure()
 	a.trilaterate()
 
-	# a.plot_rssis(gateway_ids[0])
-	# plt.ylim(ymax = -70, ymin = -100)
-	# plt.show()
+

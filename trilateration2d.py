@@ -7,6 +7,12 @@ import math
 from json import encoder
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
+
+
+
+
+
+
 class base_station(object):
     def __init__(self, lat, lon, dist):
         self.lat = lat
@@ -76,6 +82,7 @@ def is_contained_in_circles(point, circles):
             return False
     return True
 
+
 def get_polygon_center(points):
     center = point(0, 0)
     num = len(points)
@@ -124,18 +131,24 @@ if __name__ == '__main__' :
 #     p2 = point(1.21, 0.69)
 #     p3 = point(0.87, 0.84)
 
-    # c1 = circle(p1, 0.70)
-    # c2 = circle(p2, 0.51)
-    # c3 = circle(p3, 0.63)
+#     c1 = circle(p1, 0.70)
+#     c2 = circle(p2, 0.51)
+#     c3 = circle(p3, 0.63)
 
-    # circle_list = [c1, c2, c3]
+#     circle_list = [c1, c2, c3]
 
-    # inner_points = []
-    # for p in get_all_intersecting_points(circle_list):
-    #     if is_contained_in_circles(p, circle_list):
-    #         inner_points.append(p) 
+#     inner_points = []
+#     for p in get_all_intersecting_points(circle_list):
+#         if is_contained_in_circles(p, circle_list):
+#             inner_points.append(p) 
     
-    # center = get_polygon_center(inner_points)
+
+#     center = get_polygon_center(inner_points)
+
+
+#     print center.x, center.y
+
+
     # in_json = json_data([c1, c2, c3], [p1, p2, p3], center)
 
     # out_json = json.dumps(in_json, sort_keys=True,
