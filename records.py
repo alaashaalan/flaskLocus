@@ -42,17 +42,6 @@ class Record:
 		self.label = record_tuple[5]
 		self.ntp = record_tuple[6]
 
-	def init_from_old_database(self, record_tuple):
-		
-		# print record_tuple
-		# raise NotImplementedError
-		self.timestamp = record_tuple[5]  
-		self.tag_id = record_tuple[1]
-		self.gateway_id = record_tuple[2]
-		self.rssi = record_tuple[3]
-		self.raw_packet_content = record_tuple[4] 
-		self.label = record_tuple[6]
-		self.ntp = record_tuple[5]
 
 	def belongs_to_time_range(self, start, end):
 		if self.timestamp >= start and self.timestamp <= end:
@@ -74,7 +63,7 @@ class ListOfRecords(list):
 		raise NotImplementedError
 
 
-	def from_database(self, beacon, gateways, start, end):
+	def init_from_database(self, beacon, gateways, start, end):
 		database, cursor = db.connection()
 		# query = "SELECT * FROM test_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
 		query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
