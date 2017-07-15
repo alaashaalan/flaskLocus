@@ -1,4 +1,4 @@
-# from celery.schedules import crontab
+from celery.schedules import crontab
 
 def credentials():
 
