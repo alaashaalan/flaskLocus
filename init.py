@@ -3,6 +3,7 @@ import helper_functions
 import db
 import datetime
 import celery_app
+import trilateration_mysql
 from config import celery_config
 
 
@@ -72,7 +73,6 @@ def training_result():
 	return render_template('training_result.html')
 
 
-@celery.task(name='celery_timestamp_matching')
-def celery_timestamp_matching():
-	helper_functions.timestamp_matching()
-	return 'Data Processed successfully on' + str(datetime.datetime.now())
+@app.route( '/timestamp_matching' , methods=[ 'GET']) 
+def daily_processing():
+	raise NotImplementedError
