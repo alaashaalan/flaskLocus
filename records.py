@@ -18,6 +18,8 @@ import optimization_trilateration
 import locus
 import itertools
 
+pd.options.mode.chained_assignment = None  # default='warn'
+
 class Record:
 	def __init__(self, timestamp=None, tag_id=None, gateway_id=None, rssi=None, raw_packet_content=None, label=None, ntp=None):
 		self.timestamp = timestamp  
@@ -197,7 +199,7 @@ class MatchedTimestamps:
 		self.classifier = classifier
 
 
-	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=True):
+	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=False):
 		self.gateway_list = gateways
 
 		all_data = {}
@@ -420,91 +422,26 @@ class MatchedTimestamps:
 		return self.data_frame.__repr__()
 		
 if __name__ == "__main__":
-
-	pd.options.mode.chained_assignment = None  # default='warn'
-
-	matched_timestamps =  MatchedTimestamps()
+	# EXAMPLE:
 
 	# specify what beacon, gateway and timerange you're interested in
 	# filter length=None means no filter
 	# if you put filter=10 for example you will use moving average over 10 seconds
-	matched_timestamps.init_from_database('0CF3EE0B0BDD', 
-		['EDC36C497B43', 'DB994C10DF07', 'EE5A181D4A27', 'C9827BC63EE9', 'D06A1A8F44DA', 'EF4DCFA41F7E'], 
-		datetime(2016, 6, 29, 22, 00, 18, 0), datetime(2017, 7, 10, 23, 17, 22, 0), 
-		filter_length=3)
+	matched_timestamps =  MatchedTimestamps()
+	matched_timestamps.init_from_database('1', 
+		['1', '2', '3'], 
+		datetime(2017, 7, 13, 19, 40, 0), datetime(2017, 7, 13, 19, 40, 1), 
+		filter_length=None)
 
-	matched_timestamps.two_d_plot('training')
-	matched_timestamps.replace_nan()
-	matched_timestamps = matched_timestamps.remove_nan()
+	# print processed matched timestamp table
+	print matched_timestamps.data_frame
+
 	matched_timestamps.standardize()
-	matched_timestamps.two_d_plot('scaled_training')
+	matched_timestamps.train_SVM()
 
-	# split the entire datasat into training and testing
-	training, testing = matched_timestamps.train_test_split(training_size=0.5, seed=None)
+	# predict itself
+	print matched_timestamps.predict()
 
-	# create a classfier using the trainging dataset
-	cvm = training.train_CVM()
-
-	# check accuracy of the training dataset with training classifier
-	accuracy = training.accuracy_of_model()
-	print "accuracy of the training data is: " + str(accuracy)
-
-
-	# assigin the classifier to the testing dataset
-	testing.classifier = cvm
-	
-	# check accuracy of the testing dataset with training classifier
-	accuracy = testing.accuracy_of_model()
-	print "accuracy of the testing data is: " + str(accuracy)
-	
-
-
-	#specify what beacon, gateway and timerange you're interested in
-	#filter length=None means no filter
-	#if you put filter=10 for example you will use moving average over 10 seconds
-	al_walk = MatchedTimestamps()
-	al_walk.init_from_database('0CF3EE0B0BDD', 
-		['EDC36C497B43', 'DB994C10DF07', 'EE5A181D4A27', 'C9827BC63EE9', 'D06A1A8F44DA', 'EF4DCFA41F7E'], 
-		datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0), 
-		filter_length=3)
-	al_walk.two_d_plot('testing')
-	al_walk.replace_nan()
-	al_walk = al_walk.remove_nan()
-	al_walk.standardize()
-	al_walk.two_d_plot('scaled_testing')
-	al_walk.classifier = cvm
-	prediction = al_walk.predict()
-	
-	probabilites = al_walk.predict_proba()
-	#print probabilites
-#datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0),
-
-	print prediction
-
-	# for item in range(1,len(probabilites)):
-	# 	if (prediction[item] == '1-1' and prediction[item+1]=='2-2') or (prediction[item] == '2-2' and prediction[item+1]=='1-1'):
-	# 		prob = probabilites[item]
-	# 		if prob[2] >= prob[3]:
-	# 			prediction[item+1] = '1-2' 
-	# 		else:
-	# 			prediction[item+1] = '2-1'
-	# 	if (prediction[item] == '2-2' and prediction[item+1]=='1-2') or (prediction[item] == '1-2' and prediction[item+1]=='2-2'):
-	# 		prob = probabilites[item]
-	# 		if prob[1] >= prob[4]:
-	# 			prediction[item+1] = '1-1' 
-	# 		else:
-	# 			prediction[item+1] = '2-2'
-
-	# print prediction
-
-
-
-	# probability = []
-	# for item in probabilites:
-	# 	probability.append(item)
-	# print probability
-
-	# print len(probability)
-	# print len(probabilites)
 
 	
+	# print matched_timestamps.train_SVM()

@@ -41,10 +41,6 @@ class Gateway:
 		return trilateration2d.point(self.x, self.y)
 
 
-class Beacon:
-	raise NotImplementedError
-
-
 if __name__ == '__main__':
 	lab = Location('location.json')
 	print(lab.list_of_beacons)
