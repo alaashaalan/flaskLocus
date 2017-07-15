@@ -11,12 +11,11 @@ def rssi_to_meter(rssi): #code works but will need some modification based what 
 	distance = 10**((RSSI_1m - rssi)/20)
 	return distance
 
+
 def meter_to_rssi(meter): #code works but will need some modification based what type of string we pass it
 	RSSI_1m = RSSI_1M  #this value is experimentally measured
 	rssi = -20*(math.log10(meter)) + RSSI_1m
 	return rssi
-
-
 
 
 def slope_limit_rssi(current_rssi, last_distance, max_delta_distance):
