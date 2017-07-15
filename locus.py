@@ -1,5 +1,4 @@
 import json
-import trilateration2d
 
 class Location:
 	"""

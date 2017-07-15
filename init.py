@@ -3,7 +3,6 @@ import helper_functions
 import db
 import datetime
 import celery_app
-import trilateration_mysql
 from config import celery_config
 
 
