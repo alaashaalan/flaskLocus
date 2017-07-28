@@ -9,7 +9,7 @@ from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+#from mpl_toolkits.mplot3d import Axes3D
 
 
 import db
@@ -66,12 +66,13 @@ class ListOfRecords(list):
 	def init_from_database(self, beacon, gateways, start, end, label=None):
 		database, cursor = db.connection()
 		# query = "SELECT * FROM test_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
-		if label == None:
-			query = "SELECT * FROM raw_data WHERE tag_id = {} AND label={}".format('%s', '%s', '%s', '%s','%s')
+		if label != None:
+			query = "SELECT * FROM raw_data WHERE tag_id= {} AND label={}".format('%s', '%s')
+			cursor.execute(query, [beacon, label])
 		else:
 			query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
-
-		cursor.execute(query, [beacon, gateways, start, end])
+			cursor.execute(query, [beacon, gateways, start, end])
+		
 		records = cursor.fetchall()
 		database.close()
 		for row in records:
@@ -137,6 +138,7 @@ class ListOfRecords(list):
 			rssis.append(record.rssi)
 			timestamps.append(record.timestamp)
 
+
 		# modes = ['full', 'same', 'valid']
 		filtered_rssi = np.convolve(rssis, np.ones((window,))/window, mode='valid')
 
@@ -193,10 +195,12 @@ class MatchedTimestamps:
 
 	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=False, label=None):
 		self.gateway_list = gateways
-
 		all_data = {}
+		print gateways
 		for gateway in gateways:
+			print gateway
 			records = ListOfRecords()
+
 			records.init_from_database(beacon, gateway, start, end, label)
 			if slope_filter:
 				records = records.slope_filter() 
@@ -205,6 +209,7 @@ class MatchedTimestamps:
 			records = records.average_per_second()
 
 			all_data[gateway] = records
+			print 'Completed'
 
 		data_frame = self._match_by_time(all_data)
 		self.data_frame = data_frame

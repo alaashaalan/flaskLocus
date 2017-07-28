@@ -46,7 +46,7 @@ def intake():
 		data = request.get_data()
 		db.insert_multiple_messages(data)
 	return (data + '\n', 200)
-'''
+
 @app.route('/training_setup', methods=['POST', 'GET'])
 def training_setup():
 	return render_template('training_setup.html')
@@ -65,14 +65,15 @@ def training_result():
 	# Process Data into correct form to run SVM
 	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
 	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
-	gateway_id = gateway_id.split(',')
+	gateway_id = [whitespace.strip() for whitespace in gateway_id.split(',')]
+	filter_window = int(filter_window)
 
 	# Train SVM and check results
-	run_SVM(beacon_id, gateway_id, start_date, end_date, filter_window, testing_label)
+	run_SVM(beacon_id, gateway_id, start_date, end_date, filter_window, test_label)
 
 	return render_template('training_result.html')
-'''
 
-@app.route( '/timestamp_matching' , methods=[ 'GET']) 
+
+@app.route('/timestamp_matching' , methods=[ 'GET']) 
 def daily_processing():
 	raise NotImplementedError
