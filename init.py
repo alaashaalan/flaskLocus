@@ -26,10 +26,10 @@ def index():
 
 @app.route('/startstop', methods=['POST'])
 def startstop():
-	if request.form['button'] == 'start':
+	if request.form['button'] == 'Start':
 		label = request.form['label']
 		status = 1
-	if request.form['button'] == 'stop':
+	if request.form['button'] == 'Stop':
 		label = None
 		status = 0
 	db.set_app_state(status, label)
