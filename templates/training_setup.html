@@ -1,0 +1,33 @@
+<head>
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='main.css') }}">
+</head>
+
+
+<div id="form-main">
+   <div id="form-div">
+      <form action = "{{ url_for('training_result') }}" method = "POST" class="form">
+         <div class="section">Start Date
+            <input class="feedback-input" type = "datetime-local" value = "2017-06-01 08:30:20" name= "start_date" />
+         </div>
+         <div class="section">End Date 
+            <input class="feedback-input" type = "datetime-local" name = "end_date" value = "2017-07-01 08:30:15" />
+         </div>
+         <div class="section">Beacon Id 
+            <input class="feedback-input" type = "text" name = "beacon_id" />
+         </div>
+         <div class="section">Gateway Ids 
+            <input class="feedback-input"  type ="text" name = "gateway_id"  value = "EDC36C497B43,DB994C10DF07,EE5A181D4A27,C9827BC63EE9,D06A1A8F44DA,EF4DCFA41F7E" />
+         </div>
+         <div class="section">Filter Window
+            <input class="feedback-input" type ="text" name = "filter_window" value="3"/>
+         </div>
+         <div class="section">Testing Label
+            <input class="feedback-input" type ="text" name = "test_label" />
+         </div>
+         <div class="submit">
+            <input type="submit" value="SEND" id="button-blue"/>
+            <div class="ease"></div>
+         </div>  
+      </form>
+   </div>
+</div>
