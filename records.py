@@ -369,12 +369,39 @@ class MatchedTimestamps:
 			self.data_frame[gateway] = scaled
 
 
-	# def replace_nan_imputer(self):
-	# 	imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
-	# 	gateway_list=self.gateway_list
-	# 	for gateway in gateway_list:
-	# 		imputed = imp.fit_transform(self.data_frame[gateway])
-	# 		self.data_frame[gateway] = imputed
+	def scale(self):
+		gateway_list=self.gateway_list
+		for gateway in gateway_list:
+			rssis = []
+			for rssi in self.data_frame[gateway].values:
+				rssis.append(helper_functions.rssi_to_meter(rssi))
+			self.data_frame[gateway] = rssis
+
+
+	def replace_nan_with_number(self, number):
+		gateway_list=self.gateway_list
+		for gateway in gateway_list:
+			rssis = []
+			for rssi in self.data_frame[gateway].values:
+				if np.isnan(rssi):
+					rssi = number
+				rssis.append(rssi)
+
+			self.data_frame[gateway] = rssis
+
+
+
+
+	def replace_nan_imputer(self):
+		imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+		gateway_list=self.gateway_list
+		for gateway in gateway_list:
+			imputed = imp.fit_transform(self.data_frame[gateway])
+			self.data_frame[gateway] = imputed
+
+
+
+
 	def replace_nan(self):
 		gateway_list=self.gateway_list
 		numb_of_nan=0
@@ -427,18 +454,14 @@ if __name__ == "__main__":
 	matched_timestamps =  MatchedTimestamps()
 	matched_timestamps.init_from_database('1', 
 		['1', '2', '3'], 
-		datetime(2017, 7, 13, 19, 40, 0), datetime(2017, 7, 13, 19, 40, 1), 
+		datetime(2017, 7, 13, 19, 40, 0), datetime(2017, 7, 13, 19, 40, 4), 
 		filter_length=None)
 
 	# print processed matched timestamp table
 	print matched_timestamps.data_frame
-
-	matched_timestamps.standardize()
-	matched_timestamps.train_SVM()
-
-	# predict itself
-	print matched_timestamps.predict()
-
-
-	
-	# print matched_timestamps.train_SVM()
+	matched_timestamps.scale()
+	print matched_timestamps.data_frame
+	matched_timestamps.data_frame.ix[[1], '2'] = np.nan
+	matched_timestamps.data_frame.ix[[2], '3'] = np.nan
+	matched_timestamps.replace_nan_with_number(1000)
+	print matched_timestamps.data_frame
