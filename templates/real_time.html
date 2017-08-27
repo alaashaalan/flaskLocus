@@ -1,0 +1,53 @@
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='main.css') }}">
+
+    <script>
+    function classify() {
+        $.post('/classify', {
+        beacon: '1',
+        gateways: '2',
+        classifier: '3'
+        }).done(function(classified) {
+            $('#class').text(classified['class'])
+        }).fail(function() {
+            $('#class').text("Error: Could not contact server.");
+        });
+        setTimeout(classify,1000);
+    }
+    </script>
+
+
+</head>
+
+<title>Stop the App</title>
+<div id="form-main">
+    <div id="form-div">
+        <div class="section">
+            <h2>
+                Real-Time Classification
+            </h2>
+        </div>
+        <div class="section" id="class">
+            Class
+        </div>
+
+        <div id="content">
+            <form method="post" action="javascript:classify();">
+                <div class="section">Beacon Id 
+                    <input class="feedback-input" type = "text" name = "beacon_id" />
+                </div>
+                <div class="section">Gateway Ids 
+                    <input class="feedback-input"  type ="text" name = "gateway_id"  value = "EDC36C497B43,DB994C10DF07,EE5A181D4A27,C9827BC63EE9,D06A1A8F44DA,EF4DCFA41F7E" />
+                </div>
+
+                <div class="section">Classifier
+                    <input class="feedback-input" type ="text" name = "classifier" />
+                </div>
+
+                <input type="submit" value="Classify" id="button-blue" name="button"/>
+                    <div class="ease"></div>
+            </form-divm>
+        </div>
+    </div>
+</div>

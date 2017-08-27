@@ -1,10 +1,13 @@
 from flask import Flask, request, render_template, url_for, redirect
+from flask import jsonify
+import random
+
 import helper_functions
 import db
 import datetime
 import celery_app
 from config import celery_config
-from data_process import run_SVM
+from data_process import train_SVM
 
 
 app = Flask(__name__)
@@ -77,3 +80,24 @@ def training_result():
 @app.route('/timestamp_matching' , methods=[ 'GET']) 
 def daily_processing():
 	raise NotImplementedError
+
+
+
+@app.route('/real_time', methods=['GET']) 
+def real_time():
+	return render_template('real_time.html')
+
+
+
+@app.route('/classify', methods=['POST'])
+def classify():
+
+
+
+	print request.form['beacon']
+	print request.form['gateways'] 
+	print request.form['classifier']
+
+
+	return jsonify({
+    	'class': 'class'+ str((random.randint(0, 9)))})
