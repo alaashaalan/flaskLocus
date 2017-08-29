@@ -5,7 +5,7 @@
 
 <div id="form-main">
    <div id="form-div">
-      <form action = "{{ url_for('predict_model') }}" method = "POST" class="form">
+      <form action = "{{ url_for('predict_classifier') }}" method = "POST" class="form">
          <div class="section">Start Date
             <input class="feedback-input" type = "datetime-local" value = "2017-06-01 08:30:20" name= "start_date" />
          </div>
@@ -18,8 +18,8 @@
          <div class="section">Gateway Ids 
             <input class="feedback-input"  type ="text" name = "gateway_id"  value = "EDC36C497B43,DB994C10DF07,EE5A181D4A27,C9827BC63EE9,D06A1A8F44DA,EF4DCFA41F7E" />
          </div>
-         <div class="section">Model Name
-            <input class="feedback-input" type = "text" name = "model_name" />
+         <div class="section">Classifier Name
+            <input class="feedback-input" type = "text" name = "classifier_name" />
          </div>
          <div class="section">Filter Window
             <input class="feedback-input" type ="text" name = "filter_window" value="3"/>

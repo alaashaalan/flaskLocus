@@ -11,10 +11,10 @@ CREATE TABLE raw_data (
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE models (
+CREATE TABLE classifiers (
 	id INT NOT NULL AUTO_INCREMENT,
-	model_name VARCHAR(50),  
-	model VARCHAR(10000),
+	classifier_name VARCHAR(50),  
+	classifier longblob,
 	PRIMARY KEY (id)
 );
 
