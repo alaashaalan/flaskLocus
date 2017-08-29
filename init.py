@@ -7,7 +7,7 @@ import db
 import datetime
 import celery_app
 from config import celery_config
-from data_process import train_SVM
+from data_process import train_SVM, predict_SVM
 
 
 app = Flask(__name__)
@@ -92,12 +92,19 @@ def real_time():
 @app.route('/classify', methods=['POST'])
 def classify():
 
+	# beacon_id = request.form['beacon']
+	# gateway_id = request.form['gateways'].split(',')
+	# end_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	# end_date = end_date + datetime.timedelta(hours=7)  # convert to UTC
+	# start_date = end_date - datetime.timedelta(seconds=1)
+	# classifier = request.form['classifier']
+	# filter_window = 1
 
 
-	print request.form['beacon']
-	print request.form['gateways'] 
-	print request.form['classifier']
+	# prediction = predict_SVM(beacon_id, gateway_id, start_date, end_date, filter_window, classifier)
 
 
 	return jsonify({
-    	'class': 'class'+ str((random.randint(0, 9)))})
+    	'class': 'class' + str(random.randint(1,9))})
+
+	
