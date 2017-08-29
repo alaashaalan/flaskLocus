@@ -37,3 +37,44 @@ def slope_limit_rssi(current_rssi, last_distance, max_delta_distance):
 		new_rssi = max_rssi
 		
 	return new_rssi
+
+def path_rules(prediction, probabilites, positions):
+	numb_of_corrections =0
+	last_num = 500
+	for item in range(len(probabilites)-1):
+		t = 1
+		cur_pos  = prediction[item]
+		cur_row = int(cur_pos[0])
+		cur_col = int(cur_pos[2])
+
+		next_pos = prediction[item+1]
+		next_row = int(next_pos[0])
+		next_col = int(next_pos[2])
+
+
+		next_prob = probabilites[item+1]
+		next_prob_sorted = sorted(probabilites[item+1], key=int, reverse=True)
+
+		while (abs(next_row-cur_row)>1) or (abs(next_col-cur_col)>1): 
+			next_best_guess = next_prob_sorted[t]
+			for location in range(len(next_prob)):
+				if next_best_guess == next_prob[location]: 
+					next_pos = positions[location]
+			next_row = int(next_pos[0])
+			next_col = int(next_pos[2])
+			t = t+1
+		if t>1: 
+			if abs(last_num - item) ==1:
+				numb_of_corrections+=1
+				last_num=item
+			else: 
+				numb_of_corrections=0
+		next_pos = str(next_row)
+		next_pos+='-'
+		next_pos+=str(next_col)
+		if numb_of_corrections < 2:
+			prediction[item+1] = next_pos
+		else: 
+			numb_of_corrections=0
+
+	print prediction
