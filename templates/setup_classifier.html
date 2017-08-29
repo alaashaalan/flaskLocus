@@ -5,6 +5,10 @@
 
 <div id="form-main">
    <div id="form-div">
+      <div class="section">
+         <h2> Setup Classifier
+         </h2>
+      </div>
       <form action = "{{ url_for('init_classifier') }}" method = "POST" class="form">
          <div class="section">Start Date
             <input class="feedback-input" type = "datetime-local" value = "2017-06-01 08:30:20" name= "start_date" />
