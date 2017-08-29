@@ -11,6 +11,13 @@ CREATE TABLE raw_data (
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE models (
+	id INT NOT NULL AUTO_INCREMENT,
+	model_name VARCHAR(50),  
+	model VARCHAR(10000),
+	PRIMARY KEY (id)
+);
+
 DROP TABLE if exists app_state;
 CREATE TABLE app_state (
 	status BOOLEAN, 

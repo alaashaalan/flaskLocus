@@ -4,8 +4,7 @@ import db
 import datetime
 import celery_app
 from config import celery_config
-from data_process import run_SVM
-
+import models
 
 app = Flask(__name__)
 
@@ -47,19 +46,19 @@ def intake():
 		db.insert_multiple_messages(data)
 	return (data + '\n', 200)
 
-@app.route('/training_setup', methods=['POST', 'GET'])
-def training_setup():
-	return render_template('training_setup.html')
+@app.route('/setup_model', methods=['POST', 'GET'])
+def setup_model():
+	return render_template('setup_model.html')
 
-@app.route('/training_result', methods=['POST'])
-def training_result():
+@app.route('/init_model', methods=['POST'])
+def init_model():
 	# Collect data from request form (ASSUMES IS PROPER DATA)
 	start_date = request.form['start_date']
 	end_date = request.form['end_date']
 	beacon_id = request.form['beacon_id']
 	gateway_id = request.form['gateway_id']
 	filter_window = request.form['filter_window']
-	test_label = request.form['test_label']
+	model_name = request.form['model_name']
 
 
 	# Process Data into correct form to run SVM
@@ -69,9 +68,34 @@ def training_result():
 	filter_window = int(filter_window)
 
 	# Train SVM and check results
-	run_SVM(beacon_id, gateway_id, start_date, end_date, filter_window, test_label)
+	model = models.create_model(beacon_id, gateway_id, start_date, end_date, filter_window, model_name)
+	db.save_model(model, model_name)
 
-	return render_template('training_result.html')
+	return render_template('use_model.html')
+
+@app.route('/use_model', methods=['POST', 'GET'])
+def use_model():
+	return render_template('use_model.html')
+
+@app.route('/predict_model', methods=['POST'])
+def predict_model():
+
+	# Collect data from request form (ASSUMES IS PROPER DATA)
+	start_date = request.form['start_date']
+	end_date = request.form['end_date']
+	beacon_id = request.form['beacon_id']
+	gateway_id = request.form['gateway_id']
+	label = request.form['label']
+	filter_window = request.form['filter_window']
+	model_name = request.form['model_name']
+
+	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
+	gateway_id = [whitespace.strip() for whitespace in gateway_id.split(',')]
+	filter_window = int(filter_window)
+
+	result = models.use_model(beacon_id, gateway_id, start_date, end_date, filter_window, model_name, label)
+	return render_template('use_model.html')
 
 
 @app.route('/timestamp_matching' , methods=[ 'GET']) 

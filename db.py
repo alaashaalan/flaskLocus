@@ -3,6 +3,7 @@ import pprint
 import MySQLdb
 import config
 import numpy as np
+import helper_functions
 
 
 # Returns credentials to connect to database
@@ -41,6 +42,31 @@ def insert_message(message):
 	database.commit()
 	database.close()
 
+def save_model(model, model_name):
+
+	database, cursor = connection()
+
+	insert_statement = (
+		"INSERT INTO models (model, model_name)"
+		"VALUES (%s, %s)"
+		)
+
+	data = (model, model_name)
+	cursor.execute(insert_statement,data)
+	database.commit()
+	database.close()
+
+def load_model(model_name):
+
+	database, cursor = connection()
+
+	query = "SELECT model FROM models WHERE model_name = {}".format('%s')
+	cursor.execute(query, [model_name])
+	model = cursor.fetchall()
+	model = helper_functions.flatten_2d_struct(model)
+	model = model[0]
+	database.close()
+	return model
 
 def validate_message(message):
 	message_values = message.split(',')
