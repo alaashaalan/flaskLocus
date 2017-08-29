@@ -51,7 +51,7 @@ def setup_classifier():
 	return render_template('setup_classifier.html')
 
 @app.route('/init_classifier', methods=['POST'])
-def init_classifier):
+def init_classifier():
 	# Collect data from request form (ASSUMES IS PROPER DATA)
 	start_date = request.form['start_date']
 	end_date = request.form['end_date']
