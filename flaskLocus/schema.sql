@@ -11,6 +11,13 @@ CREATE TABLE raw_data (
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE classifiers (
+	id INT NOT NULL AUTO_INCREMENT,
+	classifier_name VARCHAR(50),  
+	classifier longblob,
+	PRIMARY KEY (id)
+);
+
 DROP TABLE if exists app_state;
 CREATE TABLE app_state (
 	status BOOLEAN, 

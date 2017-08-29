@@ -37,3 +37,7 @@ def slope_limit_rssi(current_rssi, last_distance, max_delta_distance):
 		new_rssi = max_rssi
 		
 	return new_rssi
+
+# Accepts 2D lists or tuples and flattens them into the corresponding structure
+def flatten_2d_struct(struct_2d):
+	return [element for struct_1d in struct_2d for element in struct_1d]

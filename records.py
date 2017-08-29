@@ -302,7 +302,7 @@ class MatchedTimestamps:
 		return self.classifier
 
 
-	def accuracy_of_model(self):
+	def accuracy_of_classifier(self):
 		data = np.array(self.data_frame[self.gateway_list])
 		labels = np.array(self.data_frame['label'])		
 		return self.classifier.score(data, labels)
