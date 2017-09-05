@@ -4,7 +4,7 @@ import db
 import datetime
 import celery_app
 from config import celery_config
-
+import classifiers
 
 app = Flask(__name__)
 
@@ -25,10 +25,10 @@ def index():
 
 @app.route('/startstop', methods=['POST'])
 def startstop():
-	if request.form['button'] == 'start':
+	if request.form['button'] == 'Start':
 		label = request.form['label']
 		status = 1
-	if request.form['button'] == 'stop':
+	if request.form['button'] == 'Stop':
 		label = None
 		status = 0
 	db.set_app_state(status, label)
@@ -46,7 +46,58 @@ def intake():
 		db.insert_multiple_messages(data)
 	return (data + '\n', 200)
 
+@app.route('/setup_classifier', methods=['POST', 'GET'])
+def setup_classifier():
+	return render_template('setup_classifier.html')
 
-@app.route( '/timestamp_matching' , methods=[ 'GET']) 
+@app.route('/init_classifier', methods=['POST'])
+def init_classifier():
+	# Collect data from request form (ASSUMES IS PROPER DATA)
+	start_date = request.form['start_date']
+	end_date = request.form['end_date']
+	beacon_id = request.form['beacon_id']
+	gateway_id = request.form['gateway_id']
+	filter_window = request.form['filter_window']
+	classifier_name = request.form['classifier_name']
+
+
+	# Process Data into correct form to run SVM
+	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
+	gateway_id = [whitespace.strip() for whitespace in gateway_id.split(',')]
+	filter_window = int(filter_window)
+
+	# Train SVM and check results
+	classifier = classifiers.create_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name)
+	db.save_classifier(classifier, classifier_name)
+
+	return render_template('use_classifier.html')
+
+@app.route('/use_classifier', methods=['POST', 'GET'])
+def use_classifier():
+	return render_template('use_classifier.html')
+
+@app.route('/predict_classifier', methods=['POST'])
+def predict_classifier():
+
+	# Collect data from request form (ASSUMES IS PROPER DATA)
+	start_date = request.form['start_date']
+	end_date = request.form['end_date']
+	beacon_id = request.form['beacon_id']
+	gateway_id = request.form['gateway_id']
+	label = request.form['label']
+	filter_window = request.form['filter_window']
+	classifier_name = request.form['classifier_name']
+
+	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
+	gateway_id = [whitespace.strip() for whitespace in gateway_id.split(',')]
+	filter_window = int(filter_window)
+
+	result = classifiers.use_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name, label)
+	return render_template('use_classifier.html')
+
+
+@app.route('/timestamp_matching' , methods=[ 'GET']) 
 def daily_processing():
 	raise NotImplementedError
