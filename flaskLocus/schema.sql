@@ -15,6 +15,7 @@ CREATE TABLE classifiers (
 	id INT NOT NULL AUTO_INCREMENT,
 	classifier_name VARCHAR(50),  
 	classifier longblob,
+	gateway_list blob,
 	PRIMARY KEY (id)
 );
 

@@ -11,16 +11,13 @@
       </div>
       <form action = "{{ url_for('predict_classifier') }}" method = "POST" class="form">
          <div class="section">Start Date
-            <input class="feedback-input" type = "datetime-local" value = "2017-06-01 08:30:20" name= "start_date" />
+            <input class="feedback-input" type = "text" value = "2017-06-01 08:30:20" name= "start_date" />
          </div>
          <div class="section">End Date 
-            <input class="feedback-input" type = "datetime-local" name = "end_date" value = "2017-07-01 08:30:15" />
+            <input class="feedback-input" type = "text" name = "end_date" value = "2017-07-01 08:30:15" />
          </div>
          <div class="section">Beacon Id 
             <input class="feedback-input" type = "text" name = "beacon_id" />
-         </div>
-         <div class="section">Gateway Ids 
-            <input class="feedback-input"  type ="text" name = "gateway_id"  value = "EDC36C497B43,DB994C10DF07,EE5A181D4A27,C9827BC63EE9,D06A1A8F44DA,EF4DCFA41F7E" />
          </div>
          <div class="section">Classifier Name
             <input class="feedback-input" type = "text" name = "classifier_name" />

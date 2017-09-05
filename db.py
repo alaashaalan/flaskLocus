@@ -43,17 +43,28 @@ def insert_message(message):
 	database.commit()
 	database.close()
 
-def save_classifier(classifier, classifier_name):
+def save_classifier(classifier, classifier_name, gateway_list):
 
 	database, cursor = connection()
 	classifier = pickle.dumps(classifier)
+	gateway_list = ','.join(gateway_list)
+
+	# Check if classifier name already exists
+	query = "Select classifier_name from classifiers where classifier_name = {}".format('%s')
+	cursor.execute(query,[classifier_name])
+	records = cursor.fetchall()
+
+	data = (classifier, classifier_name, gateway_list)
+
+	if len(records) != 0:
+		delete_statement ="DELETE FROM classifiers WHERE classifier_name = {}".format('%s')
+		cursor.execute(delete_statement,[classifier_name])
 
 	insert_statement = (
-		"INSERT INTO classifiers (classifier, classifier_name)"
-		"VALUES (%s, %s)"
+		"INSERT INTO classifiers (classifier, classifier_name, gateway_list)"
+		"VALUES (%s, %s, %s)"
 		)
 
-	data = (classifier, classifier_name)
 	cursor.execute(insert_statement,data)
 	database.commit()
 	database.close()
@@ -62,14 +73,16 @@ def load_classifier(classifier_name):
 
 	database, cursor = connection()
 
-	query = "SELECT classifier FROM classifiers WHERE classifier_name = {}".format('%s')
+	query = "SELECT classifier, gateway_list FROM classifiers WHERE classifier_name = {}".format('%s')
 	cursor.execute(query, [classifier_name])
-	classifier = cursor.fetchall()
-	classifier = helper_functions.flatten_2d_struct(classifier)
-	classifier = classifier[0]
+	records = cursor.fetchall()
+	records = helper_functions.flatten_2d_struct(records)
+	classifier = records[0]
+	gateway_list = records[1]
+	gateway_list = [whitespace.strip() for whitespace in gateway_list.split(',')]
 	classifier = pickle.loads(classifier)
 	database.close()
-	return classifier
+	return classifier, gateway_list
 
 def validate_message(message):
 	message_values = message.split(',')

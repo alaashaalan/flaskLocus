@@ -69,7 +69,7 @@ def init_classifier():
 
 	# Train SVM and check results
 	classifier = classifiers.create_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name)
-	db.save_classifier(classifier, classifier_name)
+	db.save_classifier(classifier, classifier_name, gateway_id)
 
 	return render_template('use_classifier.html')
 
@@ -84,18 +84,17 @@ def predict_classifier():
 	start_date = request.form['start_date']
 	end_date = request.form['end_date']
 	beacon_id = request.form['beacon_id']
-	gateway_id = request.form['gateway_id']
 	label = request.form['label']
 	filter_window = request.form['filter_window']
 	classifier_name = request.form['classifier_name']
 
 	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
 	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
-	gateway_id = [whitespace.strip() for whitespace in gateway_id.split(',')]
 	filter_window = int(filter_window)
 
-	result = classifiers.use_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name, label)
-	return render_template('use_classifier.html')
+	result = classifiers.use_classifier(beacon_id, start_date, end_date, filter_window, classifier_name, label)
+
+	return str(results)
 
 
 @app.route('/timestamp_matching' , methods=[ 'GET']) 
