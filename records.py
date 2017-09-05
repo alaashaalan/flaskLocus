@@ -295,12 +295,26 @@ class MatchedTimestamps:
 		return self.classifier		
 
 
-	def train_SVM(self):
+	def train_SVM(self, optimize=False):
 		data = np.array(self.data_frame[self.gateway_list])
 		labels = np.array(self.data_frame['label'])
 
-		clf = svm.SVC(probability=True)
-		self.classifier = clf.fit(data, labels) 
+		if optimize:
+			k_range = ('linear','rbf')
+			C_range = np.logspace(-2, 10, 13)
+			gamma_range = np.logspace(-9, 3, 13)
+			param_grid = dict(gamma=gamma_range, C=C_range, kernel=k_range)
+			sv = svm.SVC(probability=True)
+			cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
+			clf = GridSearchCV(sv,param_grid, cv=cv)
+			self.classifier = clf.fit(data, labels) 
+			print("The best parameters are %s with a score of %0.2f"
+				% (clf.best_params_, clf.best_score_))
+
+		else:
+			clf = svm.SVC(probability=True, kernel='linear', c=10)
+			self.classifier = clf.fit(data, labels) 
+			
 		return self.classifier
 
 	def train_kNN(self):
