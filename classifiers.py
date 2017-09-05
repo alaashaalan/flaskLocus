@@ -13,7 +13,8 @@ def create_classifier(beacon_id, gateway_id, start_date, end_date, filter_window
 	training_set.standardize()
 	training_set.train_SVM()
 	
-	'''
+	print training_set.predict()
+	
 	# predict itself
 	testing_set = records.MatchedTimestamps()
 	testing_set.init_from_database(beacon_id, gateway_id, start_date, end_date, 
@@ -24,16 +25,16 @@ def create_classifier(beacon_id, gateway_id, start_date, end_date, filter_window
 
 	testing_prediction = testing_set.predict()
 	print testing_prediction
-	'''
+
 	classifier = training_set.classifier
 
 	return classifier
 
-def use_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name, label):
-	classifier = db.load_classifier(classifier_name)
+def use_classifier(beacon_id, start_date, end_date, filter_window, classifier_name, label):
+	classifier, gateway_list = db.load_classifier(classifier_name)
 	
 	predicting_set = records.MatchedTimestamps()
-	predicting_set.init_from_database(beacon_id, gateway_id, start_date, end_date, 
+	predicting_set.init_from_database(beacon_id, gateway_list, start_date, end_date, 
 		filter_length=filter_window, label=label)
 	predicting_set.classifier = classifier
 	prediction = predicting_set.predict()
