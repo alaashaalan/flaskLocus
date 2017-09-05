@@ -49,12 +49,22 @@ def save_classifier(classifier, classifier_name, gateway_list):
 	classifier = pickle.dumps(classifier)
 	gateway_list = ','.join(gateway_list)
 
+	# Check if classifier name already exists
+	query = "Select classifier_name from classifiers where classifier_name = {}".format('%s')
+	cursor.execute(query,[classifier_name])
+	records = cursor.fetchall()
+
+	data = (classifier, classifier_name, gateway_list)
+
+	if len(records) != 0:
+		delete_statement ="DELETE FROM classifiers WHERE classifier_name = {}".format('%s')
+		cursor.execute(delete_statement,[classifier_name])
+
 	insert_statement = (
 		"INSERT INTO classifiers (classifier, classifier_name, gateway_list)"
 		"VALUES (%s, %s, %s)"
 		)
 
-	data = (classifier, classifier_name, gateway_list)
 	cursor.execute(insert_statement,data)
 	database.commit()
 	database.close()

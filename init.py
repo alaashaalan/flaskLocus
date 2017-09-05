@@ -69,7 +69,7 @@ def init_classifier():
 
 	# Train SVM and check results
 	classifier = classifiers.create_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name)
-	#db.save_classifier(classifier, classifier_name, gateway_id)
+	db.save_classifier(classifier, classifier_name, gateway_id)
 
 	return render_template('use_classifier.html')
 
