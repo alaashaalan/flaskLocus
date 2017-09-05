@@ -67,8 +67,8 @@ class ListOfRecords(list):
 		database, cursor = db.connection()
 		# query = "SELECT * FROM test_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
 		if label != None:
-			query = "SELECT * FROM raw_data WHERE tag_id= {} AND label={}".format('%s', '%s')
-			cursor.execute(query, [beacon, label])
+			query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {} AND label = {}" .format('%s', '%s', '%s', '%s', '%s')
+			cursor.execute(query, [beacon, gateways, start, end, label])
 		else:
 			query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
 			cursor.execute(query, [beacon, gateways, start, end])
@@ -82,6 +82,12 @@ class ListOfRecords(list):
 			# print record
 
 			self.append(record)
+
+		print 'current list of records', self
+		if len(self) == 0:
+			raise ValueError("db doesn't contain records for: ", beacon, gateways, start, end, label)
+
+
 
 
 	def get_rssis(self):
@@ -457,11 +463,15 @@ if __name__ == "__main__":
 		datetime(2017, 7, 13, 19, 40, 0), datetime(2017, 7, 13, 19, 40, 4), 
 		filter_length=None)
 
+	matched_timestamps.train_SVM()
+	print matched_timestamps.predict()
+
+
 	# print processed matched timestamp table
-	print matched_timestamps.data_frame
-	matched_timestamps.scale()
-	print matched_timestamps.data_frame
-	matched_timestamps.data_frame.ix[[1], '2'] = np.nan
-	matched_timestamps.data_frame.ix[[2], '3'] = np.nan
-	matched_timestamps.replace_nan_with_number(1000)
-	print matched_timestamps.data_frame
+	# print matched_timestamps.data_frame
+	# matched_timestamps.scale()
+	# print matched_timestamps.data_frame
+	# matched_timestamps.data_frame.ix[[1], '2'] = np.nan
+	# matched_timestamps.data_frame.ix[[2], '3'] = np.nan
+	# matched_timestamps.replace_nan_with_number(1000)
+	# print matched_timestamps.data_frame

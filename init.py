@@ -57,8 +57,10 @@ def setup_classifier():
 @app.route('/init_classifier', methods=['POST'])
 def init_classifier():
 	# Collect data from request form (ASSUMES IS PROPER DATA)
-	start_date = request.form['start_date']
-	end_date = request.form['end_date']
+	# start_date = request.form['start_date']
+	# end_date = request.form['end_date']
+	start_date = '2017-07-13 19:40:00'
+	end_date = '2017-07-13 19:40:02'
 	beacon_id = request.form['beacon_id']
 	gateway_id = request.form['gateway_id']
 	filter_window = request.form['filter_window']
@@ -70,6 +72,8 @@ def init_classifier():
 	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
 	gateway_id = [whitespace.strip() for whitespace in gateway_id.split(',')]
 	filter_window = int(filter_window)
+
+	print beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name
 
 	# Train SVM and check results
 	classifier = classifiers.create_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name)
@@ -87,20 +91,21 @@ def predict_classifier():
 	# Collect data from request form (ASSUMES IS PROPER DATA)
 	start_date = request.form['start_date']
 	end_date = request.form['end_date']
+	start_date = '2017-07-13 19:40:00'
+	end_date = '2017-07-13 19:40:02'	
 	beacon_id = request.form['beacon_id']
 	gateway_id = request.form['gateway_id']
 	label = request.form['label']
 	filter_window = request.form['filter_window']
 	classifier_name = request.form['classifier_name']
 
-	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
-	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
+	# start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+	# end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
 	gateway_id = [whitespace.strip() for whitespace in gateway_id.split(',')]
 	filter_window = int(filter_window)
 
 	result = classifiers.use_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name, label)
-	return render_template('use_classifier.html')
-
+	return str(result)
 
 @app.route('/timestamp_matching' , methods=[ 'GET']) 
 def daily_processing():

@@ -7,6 +7,8 @@ def create_classifier(beacon_id, gateway_id, start_date, end_date, filter_window
 	training_set.init_from_database(beacon_id, gateway_id, start_date, end_date, 
 		filter_length=filter_window)
 
+	print training_set
+
 	# print processed matched timestamp table
 	training_set.replace_nan()
 	training_set.remove_nan()

@@ -5,6 +5,7 @@
 
 # Running the flask application
 1. In /flaskLocus: `export FLASK_APP=init.py`
+2 To enable debug mode: `export FLASK_DEBUG=1`
 2. `flask run` (Local) or `flask run -h 0.0.0.0` (Server)
 
 
