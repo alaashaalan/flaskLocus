@@ -5,6 +5,8 @@ import pandas as pd
 
 from sklearn.neural_network import MLPClassifier
 from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
+
 from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
 
@@ -63,12 +65,16 @@ class ListOfRecords(list):
 		raise NotImplementedError
 
 
-	def init_from_database(self, beacon, gateways, start, end):
+	def init_from_database(self, beacon, gateways, start, end, label=None):
 		database, cursor = db.connection()
 		# query = "SELECT * FROM test_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
-		query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
-
-		cursor.execute(query, [beacon, gateways, start, end])
+		if label != None:
+			query = "SELECT * FROM raw_data WHERE tag_id= {} AND label={}".format('%s', '%s')
+			cursor.execute(query, [beacon, label])
+		else:
+			query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
+			cursor.execute(query, [beacon, gateways, start, end])
+		
 		records = cursor.fetchall()
 		database.close()
 		for row in records:
@@ -134,6 +140,7 @@ class ListOfRecords(list):
 			rssis.append(record.rssi)
 			timestamps.append(record.timestamp)
 
+
 		# modes = ['full', 'same', 'valid']
 		filtered_rssi = np.convolve(rssis, np.ones((window,))/window, mode='valid')
 
@@ -188,13 +195,15 @@ class MatchedTimestamps:
 		self.classifier = classifier
 
 
-	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=False):
+	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=False, label=None):
 		self.gateway_list = gateways
-
 		all_data = {}
+		print gateways
 		for gateway in gateways:
+			print gateway
 			records = ListOfRecords()
-			records.init_from_database(beacon, gateway, start, end)
+
+			records.init_from_database(beacon, gateway, start, end, label)
 			if slope_filter:
 				records = records.slope_filter() 
 			if filter_length is not None:
@@ -202,6 +211,7 @@ class MatchedTimestamps:
 			records = records.average_per_second()
 
 			all_data[gateway] = records
+			print 'Completed'
 
 		data_frame = self._match_by_time(all_data)
 		self.data_frame = data_frame
@@ -285,16 +295,37 @@ class MatchedTimestamps:
 		return self.classifier		
 
 
-	def train_SVM(self):
+	def train_SVM(self, optimize=False):
 		data = np.array(self.data_frame[self.gateway_list])
 		labels = np.array(self.data_frame['label'])
 
-		clf = svm.SVC(probability=True)
-		self.classifier = clf.fit(data, labels) 
+		if optimize:
+			k_range = ('linear','rbf')
+			C_range = np.logspace(-2, 10, 13)
+			gamma_range = np.logspace(-9, 3, 13)
+			param_grid = dict(gamma=gamma_range, C=C_range, kernel=k_range)
+			sv = svm.SVC(probability=True)
+			cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
+			clf = GridSearchCV(sv,param_grid, cv=cv)
+			self.classifier = clf.fit(data, labels) 
+			print("The best parameters are %s with a score of %0.2f"
+				% (clf.best_params_, clf.best_score_))
+
+		else:
+			clf = svm.SVC(probability=True, kernel='linear', c=10)
+			self.classifier = clf.fit(data, labels) 
+			
 		return self.classifier
 
+	def train_kNN(self):
+		data = np.array(self.data_frame[self.gateway_list])
+		labels = np.array(self.data_frame['label'])
+		clf = KNeighborsClassifier(n_neighbors=2)
+		self.classifier = clf.fit(data, labels) 
+		return self.classifier		
 
-	def accuracy_of_model(self):
+
+	def accuracy_of_classifier(self):
 		data = np.array(self.data_frame[self.gateway_list])
 		labels = np.array(self.data_frame['label'])		
 		return self.classifier.score(data, labels)
@@ -361,12 +392,39 @@ class MatchedTimestamps:
 			self.data_frame[gateway] = scaled
 
 
-	# def replace_nan_imputer(self):
-	# 	imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
-	# 	gateway_list=self.gateway_list
-	# 	for gateway in gateway_list:
-	# 		imputed = imp.fit_transform(self.data_frame[gateway])
-	# 		self.data_frame[gateway] = imputed
+	def scale(self):
+		gateway_list=self.gateway_list
+		for gateway in gateway_list:
+			rssis = []
+			for rssi in self.data_frame[gateway].values:
+				rssis.append(helper_functions.rssi_to_meter(rssi))
+			self.data_frame[gateway] = rssis
+
+
+	def replace_nan_with_number(self, number):
+		gateway_list=self.gateway_list
+		for gateway in gateway_list:
+			rssis = []
+			for rssi in self.data_frame[gateway].values:
+				if np.isnan(rssi):
+					rssi = number
+				rssis.append(rssi)
+
+			self.data_frame[gateway] = rssis
+
+
+
+
+	def replace_nan_imputer(self):
+		imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+		gateway_list=self.gateway_list
+		for gateway in gateway_list:
+			imputed = imp.fit_transform(self.data_frame[gateway])
+			self.data_frame[gateway] = imputed
+
+
+
+
 	def replace_nan(self):
 		gateway_list=self.gateway_list
 		numb_of_nan=0
@@ -397,17 +455,7 @@ class MatchedTimestamps:
 			#print rssis
 		print "replaced",numb_of_nan,"elements containing NaN" 
 
-	def get_labels(self):
-		a = np.array(self.data_frame['label'])
-		#a = set(a)
-		seen = set()
-		result = []
-		for item in a:
-			if item not in seen:
-				seen.add(item)
-				result.append(item)
-		return result
-
+			
 
 	def _rename_label(self):
 		matched_timestamps_merged =  copy.deepcopy(self)
@@ -419,69 +467,24 @@ class MatchedTimestamps:
 	def __repr__(self):
 
 		return self.data_frame.__repr__()
-
-
 		
 if __name__ == "__main__":
-	pd.options.mode.chained_assignment = None  # default='warn'
-
-	matched_timestamps =  MatchedTimestamps()
+	# EXAMPLE:
 
 	# specify what beacon, gateway and timerange you're interested in
 	# filter length=None means no filter
 	# if you put filter=10 for example you will use moving average over 10 seconds
-	matched_timestamps.init_from_database('0CF3EE0B0BDD', 
-		['EDC36C497B43', 'DB994C10DF07', 'EE5A181D4A27', 'C9827BC63EE9', 'D06A1A8F44DA', 'EF4DCFA41F7E'], 
-		datetime(2016, 6, 29, 22, 00, 18, 0), datetime(2017, 7, 10, 23, 17, 22, 0), 
-		filter_length=3)
-
-	matched_timestamps.two_d_plot('training')
-	matched_timestamps.replace_nan()
-	matched_timestamps = matched_timestamps.remove_nan()
-	matched_timestamps.standardize()
-	matched_timestamps.two_d_plot('scaled_training')
-
-	# split the entire datasat into training and testing
-	training, testing = matched_timestamps.train_test_split(training_size=0.5, seed=None)
-
-	labels = matched_timestamps.get_labels()
-	# create a classfier using the trainging dataset
-	svm = training.train_SVM()
+	matched_timestamps =  MatchedTimestamps()
+	matched_timestamps.init_from_database('1', 
+		['1', '2', '3'], 
+		datetime(2017, 7, 13, 19, 40, 0), datetime(2017, 7, 13, 19, 40, 4), 
+		filter_length=None)
 
 
+	print "predict using SVM"
+	matched_timestamps.train_SVM()
+	print matched_timestamps.predict()
 
-	# check accuracy of the training dataset with training classifier
-	accuracy = training.accuracy_of_model()
-	print "accuracy of the training data is: " + str(accuracy)
-
-
-	# assigin the classifier to the testing dataset
-	testing.classifier = svm
-	
-	# check accuracy of the testing dataset with training classifier
-	accuracy = testing.accuracy_of_model()
-	print "accuracy of the testing data is: " + str(accuracy)
-	
-	#specify what beacon, gateway and timerange you're interested in
-	#filter length=None means no filter
-	#if you put filter=10 for example you will use moving average over 10 seconds
-	al_walk = MatchedTimestamps()
-	al_walk.init_from_database('0CF3EE0B0BDD', 
-		['EDC36C497B43', 'DB994C10DF07', 'EE5A181D4A27', 'C9827BC63EE9', 'D06A1A8F44DA', 'EF4DCFA41F7E'], 
-		datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0), 
-		filter_length=3)
-	al_walk.two_d_plot('testing')
-	al_walk.replace_nan()
-	al_walk = al_walk.remove_nan()
-	al_walk.standardize()
-	al_walk.two_d_plot('scaled_testing')
-	al_walk.classifier = svm
-	prediction = al_walk.predict()
-	
-	probabilites = al_walk.predict_proba()
-	print probabilites
-	#datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0),
-
-	prediction = helper_functions.path_rules(prediction, probabilites,labels)
-	print prediction
-
+	print "predict using kNN"
+	matched_timestamps.train_kNN()
+	print matched_timestamps.predict()

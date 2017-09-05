@@ -38,10 +38,15 @@ def slope_limit_rssi(current_rssi, last_distance, max_delta_distance):
 		
 	return new_rssi
 
-def path_rules(prediction, probabilites, positions):
+def path_rules(prediction, probabilities, positions):
+	"""
+	if the diff between current and next guess by more than 1 zone,
+	then look for the next best probable zone
+	"""
+
 	numb_of_corrections =0
 	last_num = 500
-	for item in range(len(probabilites)-1):
+	for item in range(len(probabilities)-1):
 		t = 1
 		cur_pos  = prediction[item]
 		cur_row = int(cur_pos[0])
@@ -52,8 +57,8 @@ def path_rules(prediction, probabilites, positions):
 		next_col = int(next_pos[2])
 
 
-		next_prob = probabilites[item+1]
-		next_prob_sorted = sorted(probabilites[item+1], key=int, reverse=True)
+		next_prob = probabilities[item+1]
+		next_prob_sorted = sorted(probabilities[item+1], key=int, reverse=True)
 
 		while (abs(next_row-cur_row)>1) or (abs(next_col-cur_col)>1): 
 			next_best_guess = next_prob_sorted[t]
