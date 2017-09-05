@@ -474,13 +474,3 @@ if __name__ == "__main__":
 	print "predict using kNN"
 	matched_timestamps.train_kNN()
 	print matched_timestamps.predict()
-
-
-	# print processed matched timestamp table
-	# print matched_timestamps.data_frame
-	# matched_timestamps.scale()
-	# print matched_timestamps.data_frame
-	# matched_timestamps.data_frame.ix[[1], '2'] = np.nan
-	# matched_timestamps.data_frame.ix[[2], '3'] = np.nan
-	# matched_timestamps.replace_nan_with_number(1000)
-	# print matched_timestamps.data_frame
