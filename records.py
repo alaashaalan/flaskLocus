@@ -5,6 +5,8 @@ import pandas as pd
 
 from sklearn.neural_network import MLPClassifier
 from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
+
 from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
 
@@ -315,6 +317,13 @@ class MatchedTimestamps:
 			
 		return self.classifier
 
+	def train_kNN(self):
+		data = np.array(self.data_frame[self.gateway_list])
+		labels = np.array(self.data_frame['label'])
+		clf = KNeighborsClassifier(n_neighbors=2)
+		self.classifier = clf.fit(data, labels) 
+		return self.classifier		
+
 
 	def accuracy_of_classifier(self):
 		data = np.array(self.data_frame[self.gateway_list])
@@ -471,11 +480,11 @@ if __name__ == "__main__":
 		datetime(2017, 7, 13, 19, 40, 0), datetime(2017, 7, 13, 19, 40, 4), 
 		filter_length=None)
 
-	# print processed matched timestamp table
-	print matched_timestamps.data_frame
-	matched_timestamps.scale()
-	print matched_timestamps.data_frame
-	matched_timestamps.data_frame.ix[[1], '2'] = np.nan
-	matched_timestamps.data_frame.ix[[2], '3'] = np.nan
-	matched_timestamps.replace_nan_with_number(1000)
-	print matched_timestamps.data_frame
+
+	print "predict using SVM"
+	matched_timestamps.train_SVM()
+	print matched_timestamps.predict()
+
+	print "predict using kNN"
+	matched_timestamps.train_kNN()
+	print matched_timestamps.predict()
