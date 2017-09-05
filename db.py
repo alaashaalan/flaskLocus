@@ -3,6 +3,8 @@ import pprint
 import MySQLdb
 import config
 import numpy as np
+import helper_functions
+import cPickle as pickle
 
 
 # Returns credentials to connect to database
@@ -41,6 +43,33 @@ def insert_message(message):
 	database.commit()
 	database.close()
 
+def save_classifier(classifier, classifier_name):
+
+	database, cursor = connection()
+	classifier = pickle.dumps(classifier)
+
+	insert_statement = (
+		"INSERT INTO classifiers (classifier, classifier_name)"
+		"VALUES (%s, %s)"
+		)
+
+	data = (classifier, classifier_name)
+	cursor.execute(insert_statement,data)
+	database.commit()
+	database.close()
+
+def load_classifier(classifier_name):
+
+	database, cursor = connection()
+
+	query = "SELECT classifier FROM classifiers WHERE classifier_name = {}".format('%s')
+	cursor.execute(query, [classifier_name])
+	classifier = cursor.fetchall()
+	classifier = helper_functions.flatten_2d_struct(classifier)
+	classifier = classifier[0]
+	classifier = pickle.loads(classifier)
+	database.close()
+	return classifier
 
 def validate_message(message):
 	message_values = message.split(',')
