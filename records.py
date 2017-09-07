@@ -5,6 +5,8 @@ import pandas as pd
 
 from sklearn.neural_network import MLPClassifier
 from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
+
 from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
 
@@ -291,13 +293,34 @@ class MatchedTimestamps:
 		return self.classifier		
 
 
-	def train_SVM(self):
+	def train_SVM(self, optimize=False):
 		data = np.array(self.data_frame[self.gateway_list])
 		labels = np.array(self.data_frame['label'])
 
-		clf = svm.SVC(probability=True)
-		self.classifier = clf.fit(data, labels) 
+		if optimize:
+			k_range = ('linear','rbf')
+			C_range = np.logspace(-2, 10, 13)
+			gamma_range = np.logspace(-9, 3, 13)
+			param_grid = dict(gamma=gamma_range, C=C_range, kernel=k_range)
+			sv = svm.SVC(probability=True)
+			cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
+			clf = GridSearchCV(sv,param_grid, cv=cv)
+			self.classifier = clf.fit(data, labels) 
+			print("The best parameters are %s with a score of %0.2f"
+				% (clf.best_params_, clf.best_score_))
+
+		else:
+			clf = svm.SVC(probability=True, kernel='linear', c=10)
+			self.classifier = clf.fit(data, labels) 
+			
 		return self.classifier
+
+	def train_kNN(self):
+		data = np.array(self.data_frame[self.gateway_list])
+		labels = np.array(self.data_frame['label'])
+		clf = KNeighborsClassifier(n_neighbors=2)
+		self.classifier = clf.fit(data, labels) 
+		return self.classifier		
 
 
 	def accuracy_of_classifier(self):
@@ -455,11 +478,11 @@ if __name__ == "__main__":
 		datetime(2017, 7, 13, 19, 40, 0), datetime(2017, 7, 13, 19, 40, 4), 
 		filter_length=None)
 
-	# print processed matched timestamp table
-	print matched_timestamps.data_frame
-	matched_timestamps.scale()
-	print matched_timestamps.data_frame
-	matched_timestamps.data_frame.ix[[1], '2'] = np.nan
-	matched_timestamps.data_frame.ix[[2], '3'] = np.nan
-	matched_timestamps.replace_nan_with_number(1000)
-	print matched_timestamps.data_frame
+
+	print "predict using SVM"
+	matched_timestamps.train_SVM()
+	print matched_timestamps.predict()
+
+	print "predict using kNN"
+	matched_timestamps.train_kNN()
+	print matched_timestamps.predict()
