@@ -207,7 +207,7 @@ class MatchedTimestamps:
 			records = records.average_per_second()
 
 			all_data[gateway] = records
-			print 'Completed processing ' + gateway + '\'s data set'
+			print 'Completed initiliazing ' + gateway + '\'s from DB'
 
 		data_frame = self._match_by_time(all_data)
 		self.data_frame = data_frame
