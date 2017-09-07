@@ -83,3 +83,7 @@ def path_rules(prediction, probabilities, positions):
 			numb_of_corrections=0
 
 	print prediction
+
+# Accepts 2D lists or tuples and flattens them into the corresponding structure
+def flatten_2d_struct(struct_2d):
+	return [element for struct_1d in struct_2d for element in struct_1d]
