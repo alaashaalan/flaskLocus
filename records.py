@@ -67,8 +67,8 @@ class ListOfRecords(list):
 		database, cursor = db.connection()
 		# query = "SELECT * FROM test_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
 		if label != None:
-			query = "SELECT * FROM raw_data WHERE tag_id= {} AND label={} AND gateway_id = {}".format('%s', '%s', '%s')
-			cursor.execute(query, [beacon, label, gateway])
+			query = "SELECT * FROM raw_data WHERE tag_id= {} AND label={} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s', '%s')
+			cursor.execute(query, [beacon, label, gateway, start, end])
 		else:
 			query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
 			cursor.execute(query, [beacon, gateway, start, end])
