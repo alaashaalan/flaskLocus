@@ -9,10 +9,10 @@ def create_classifier(beacon_id, gateway_id, start_date, end_date, filter_window
 
 	print training_set
 
-	# print processed matched timestamp table
-	training_set.replace_nan()
-	training_set.remove_nan()
-	training_set.standardize()
+	# training_set.replace_nan()
+	# training_set.remove_nan()
+	# training_set.standardize()
+	# print training_set
 	training_set.train_SVM()
 	
 	'''
@@ -37,6 +37,15 @@ def use_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, c
 	predicting_set = records.MatchedTimestamps()
 	predicting_set.init_from_database(beacon_id, gateway_id, start_date, end_date, 
 		filter_length=filter_window, label=label)
+
+	print len(predicting_set)
+
+	# print processed matched timestamp table
+	# predicting_set.replace_nan()
+	# predicting_set.remove_nan()
+	# predicting_set.standardize()
+	# print predicting_set
+
 	predicting_set.classifier = classifier
 	prediction = predicting_set.predict()
 

@@ -5,11 +5,13 @@ import pandas as pd
 
 from sklearn.neural_network import MLPClassifier
 from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
+
 from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
 
 import matplotlib.pyplot as plt
-#from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D
 
 
 import db
@@ -83,7 +85,6 @@ class ListOfRecords(list):
 
 			self.append(record)
 
-		print 'current list of records', self
 		if len(self) == 0:
 			raise ValueError("db doesn't contain records for: ", beacon, gateways, start, end, label)
 
@@ -136,6 +137,16 @@ class ListOfRecords(list):
 
 
 	def filter(self, window=None):
+
+		if window is None or window == 0:
+			return self
+
+		if not isinstance(window, int):
+			raise ValueError('filter length has to be an integer')
+
+		if window < 0:
+			raise ValueError('filter length cannot be negative')
+
 		rssis = []
 		timestamps = []
 		if window is None:
@@ -299,13 +310,34 @@ class MatchedTimestamps:
 		return self.classifier		
 
 
-	def train_SVM(self):
+	def train_SVM(self, optimize=False):
 		data = np.array(self.data_frame[self.gateway_list])
 		labels = np.array(self.data_frame['label'])
 
-		clf = svm.SVC(probability=True)
-		self.classifier = clf.fit(data, labels) 
+		if optimize:
+			k_range = ('linear','rbf')
+			C_range = np.logspace(-2, 10, 13)
+			gamma_range = np.logspace(-9, 3, 13)
+			param_grid = dict(gamma=gamma_range, C=C_range, kernel=k_range)
+			sv = svm.SVC(probability=True)
+			cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
+			clf = GridSearchCV(sv,param_grid, cv=cv)
+			self.classifier = clf.fit(data, labels) 
+			print("The best parameters are %s with a score of %0.2f"
+				% (clf.best_params_, clf.best_score_))
+
+		else:
+			clf = svm.SVC(probability=True, kernel='linear', C=10)
+			self.classifier = clf.fit(data, labels) 
+			
 		return self.classifier
+
+	def train_kNN(self):
+		data = np.array(self.data_frame[self.gateway_list])
+		labels = np.array(self.data_frame['label'])
+		clf = KNeighborsClassifier(n_neighbors=2)
+		self.classifier = clf.fit(data, labels) 
+		return self.classifier		
 
 
 	def accuracy_of_classifier(self):
@@ -343,30 +375,48 @@ class MatchedTimestamps:
 
 		return training, testing
 
-	def plot(self):
+	def plot_3d(self, fig):
 		"""hacky plotting for four categories and 3 gateways"""
+		colors = itertools.cycle(["r", "b", "g", "k", "m", "y"])
+		markers = itertools.cycle(['x', '^', 'o', '*'])		
 
 		ax = fig.add_subplot(111, projection='3d')
+
 		gateway_list = self.gateway_list
-		for label, c, m in zip(['1-1','1-2','1-3','1-4'], ['y', 'b', 'r', 'g'], ['x', '^', 'o', '*']):
+		if len(gateway_list) < 2:
+			raise ValueError('less then two gateways available')
+
+		unique_labels = np.unique(np.array(self.data_frame['label']))
+
+		for label in unique_labels:
 			ts = self.data_frame.loc[self.data_frame['label'] == label]
 			xs = ts[gateway_list[0]].values
 			ys = ts[gateway_list[1]].values
 			zs = ts[gateway_list[2]].values
-			ax.scatter(xs, ys, zs, c=c, marker=m)
+			ax.scatter(xs, ys, zs, c=next(colors), marker=next(markers))
 
 		ax.set_xlabel('X Label')
 		ax.set_ylabel('Y Label')
 		ax.set_zlabel('Z Label')		
 
-	def two_d_plot(self, filename):
-		"""hacky plotting for four categories and 3 gateways"""
+	def plot_2d(self):
+		"""plot first two gateways"""
 		colors = itertools.cycle(["r", "b", "g", "k", "m", "y"])
+		markers = itertools.cycle(['x', '^', 'o', '*'])
+
 		gateway_list = self.gateway_list
-		for gateway in gateway_list:
-			plt.plot(self.data_frame[gateway],color=next(colors))
-		plt.savefig('gif/'+str(filename))
-		plt.clf()
+		if len(gateway_list) < 2:
+			raise ValueError('less then two gateways available')
+
+		unique_labels = np.unique(np.array(self.data_frame['label']))
+		
+		for label in unique_labels:
+			ts = self.data_frame.loc[self.data_frame['label'] == label]
+			xs = ts[gateway_list[0]].values
+			ys = ts[gateway_list[1]].values
+
+			plt.scatter(xs, ys, c=next(colors), marker=next(markers))
+			
 
 	def standardize(self):
 		gateway_list=self.gateway_list
@@ -463,15 +513,19 @@ if __name__ == "__main__":
 		datetime(2017, 7, 13, 19, 40, 0), datetime(2017, 7, 13, 19, 40, 4), 
 		filter_length=None)
 
+	print matched_timestamps
+
+
+	print "predict using SVM"
 	matched_timestamps.train_SVM()
 	print matched_timestamps.predict()
 
+	print "predict using kNN"
+	matched_timestamps.train_kNN()
+	print matched_timestamps.predict()
 
-	# print processed matched timestamp table
-	# print matched_timestamps.data_frame
-	# matched_timestamps.scale()
-	# print matched_timestamps.data_frame
-	# matched_timestamps.data_frame.ix[[1], '2'] = np.nan
-	# matched_timestamps.data_frame.ix[[2], '3'] = np.nan
-	# matched_timestamps.replace_nan_with_number(1000)
-	# print matched_timestamps.data_frame
+	plt.figure()
+	matched_timestamps.plot_2d()
+	fig = plt.figure()
+	matched_timestamps.plot_3d(fig)
+	plt.show()

@@ -71,7 +71,11 @@ def init_classifier():
 	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
 	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
 	gateway_id = [whitespace.strip() for whitespace in gateway_id.split(',')]
-	filter_window = int(filter_window)
+
+	if filter_window == '0' or filter_window == 'None':
+		filter_window = None
+	else:
+		filter_window = int(filter_window)
 
 	print beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name
 
@@ -102,14 +106,14 @@ def predict_classifier():
 	# start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
 	# end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
 	gateway_id = [whitespace.strip() for whitespace in gateway_id.split(',')]
-	filter_window = int(filter_window)
+
+	if filter_window == '0' or filter_window == 'None':
+		filter_window = None
+	else:
+		filter_window = int(filter_window)
 
 	result = classifiers.use_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name, label)
 	return str(result)
-
-@app.route('/timestamp_matching' , methods=[ 'GET']) 
-def daily_processing():
-	raise NotImplementedError
 
 
 
@@ -122,19 +126,27 @@ def real_time():
 @app.route('/classify', methods=['POST'])
 def classify():
 
-	# beacon_id = request.form['beacon']
-	# gateway_id = request.form['gateways'].split(',')
-	# end_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	# start_date = '2017-07-13 19:40:00'
+	# end_date = '2017-07-13 19:40:02'	
+
+	end_date = datetime.datetime.now()
 	# end_date = end_date + datetime.timedelta(hours=7)  # convert to UTC
-	# start_date = end_date - datetime.timedelta(seconds=1)
-	# classifier = request.form['classifier']
-	# filter_window = 1
+	start_date = end_date - datetime.timedelta(seconds=1)
+	end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
+	start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
+	
+	beacon_id = 1
+	gateway_id = [1,2,3]
 
+	filter_window = None
+	label = None
 
-	# prediction = predict_SVM(beacon_id, gateway_id, start_date, end_date, filter_window, classifier)
+	classifier_name = 'test10'
 
-
+	result = classifiers.use_classifier(beacon_id, gateway_id, start_date, end_date, filter_window, classifier_name, label)
+	print result
 	return jsonify({
-    	'class': 'class' + str(random.randint(1,9))})
+    	'class': 'class' + str(result) +  str(random.randint(1,9))})
+
 
 	

@@ -5,9 +5,9 @@
     <script>
     function classify() {
         $.post('/classify', {
-        beacon: '1',
-        gateways: '2',
-        classifier: '3'
+        beacon_id: '1',
+        gateway_id: '1,2,3',
+        classifier: 'test10'
         }).done(function(classified) {
             $('#class').text(classified['class'])
         }).fail(function() {
@@ -20,7 +20,7 @@
 
 </head>
 
-<title>Stop the App</title>
+<title>Real-time Classification</title>
 <div id="form-main">
     <div id="form-div">
         <div class="section">
@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="section">Classifier
-                    <input class="feedback-input" type ="text" name = "classifier" />
+                    <input class="feedback-input" type ="text" name = "classifier_name" />
                 </div>
 
                 <input type="submit" value="Classify" id="button-blue" name="button"/>
