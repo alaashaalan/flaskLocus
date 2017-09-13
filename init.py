@@ -93,7 +93,6 @@ def predict_classifier():
 	filter_window = int(filter_window)
 
 	results = classifiers.use_classifier(beacon_id, start_date, end_date, filter_window, classifier_name, label)
-	print results
 
 	return str(results)
 
