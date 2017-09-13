@@ -6,6 +6,8 @@ import pandas as pd
 from sklearn.neural_network import MLPClassifier
 from sklearn import svm
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import StratifiedShuffleSplit
 
 from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
@@ -310,7 +312,7 @@ class MatchedTimestamps:
 				% (clf.best_params_, clf.best_score_))
 
 		else:
-			clf = svm.SVC(probability=True, kernel='linear', c=10)
+			clf = svm.SVC(probability=True, kernel='linear', C=10)
 			self.classifier = clf.fit(data, labels) 
 			
 		return self.classifier
@@ -383,10 +385,19 @@ class MatchedTimestamps:
 		plt.savefig('gif/'+str(filename))
 		plt.clf()
 
-	def standardize(self):
+	def standardize_training(self):
 		gateway_list=self.gateway_list
-		for gateway in gateway_list:
-			scaled = preprocessing.scale(self.data_frame[gateway])
+		scaler=[]
+		for index, gateway in enumerate(gateway_list):
+			scaler.append(preprocessing.StandardScaler().fit(self.data_frame[gateway]))
+			scaled = scaler[index].transform(self.data_frame[gateway]) 
+			self.data_frame[gateway] = scaled
+		return scaler
+
+	def standardize_testing(self, scaler):
+		gateway_list=self.gateway_list
+		for index, gateway in enumerate(gateway_list):
+			scaled = scaler[index].transform(self.data_frame[gateway]) 
 			self.data_frame[gateway] = scaled
 
 
@@ -453,6 +464,17 @@ class MatchedTimestamps:
 			#print rssis
 		print "replaced",numb_of_nan,"elements containing NaN" 
 
+
+	def get_labels(self):
+		a = np.array(self.data_frame['label'])
+		#a = set(a)
+		seen = set()
+		result = []
+		for item in a:
+			if item not in seen:
+				seen.add(item)
+				result.append(item)
+		return result
 			
 
 	def _rename_label(self):
@@ -467,22 +489,81 @@ class MatchedTimestamps:
 		return self.data_frame.__repr__()
 		
 if __name__ == "__main__":
-	# EXAMPLE:
+	pd.options.mode.chained_assignment = None  # default='warn'
+
+	matched_timestamps =  MatchedTimestamps()
 
 	# specify what beacon, gateway and timerange you're interested in
 	# filter length=None means no filter
 	# if you put filter=10 for example you will use moving average over 10 seconds
-	matched_timestamps =  MatchedTimestamps()
-	matched_timestamps.init_from_database('1', 
-		['1', '2', '3'], 
-		datetime(2017, 7, 13, 19, 40, 0), datetime(2017, 7, 13, 19, 40, 4), 
-		filter_length=None)
+	matched_timestamps.init_from_database('0117C59B07A4', 
+		['C9827BC63EE9', 'EF4DCFA41F7E', 'EDC36C497B43', 'EE5A181D4A27', 'D78A75B468C2', 'FF9AE92EE4C9','D13DF2E3B7E4','D9DD5DA69F7B','CD2DA08685AD'], 
+		datetime(2016, 6, 29, 22, 00, 18, 0), datetime(2017, 8, 13, 4, 49, 0, 0), 
+		filter_length=3, slope_filter = True)
 
 
-	print "predict using SVM"
-	matched_timestamps.train_SVM()
-	print matched_timestamps.predict()
 
-	print "predict using kNN"
-	matched_timestamps.train_kNN()
-	print matched_timestamps.predict()
+
+	matched_timestamps.two_d_plot('Training Data')
+	matched_timestamps.replace_nan()
+	matched_timestamps = matched_timestamps.remove_nan()
+	scaler = matched_timestamps.standardize_training()
+	matched_timestamps.two_d_plot('Standardized Training Data')
+
+	# split the entire datasat into training and testing
+	training, testing = matched_timestamps.train_test_split(training_size=0.5, seed=None)
+
+	labels = matched_timestamps.get_labels()
+	# create a classfier using the trainging dataset
+	svm = training.train_SVM()
+
+
+
+	# check accuracy of the training dataset with training classifier
+	accuracy = training.accuracy_of_model()
+	print "accuracy of the training data is: " + str(accuracy)
+
+
+	# assigin the classifier to the testing dataset
+	testing.classifier = svm
+	
+	# check accuracy of the testing dataset with training classifier
+	accuracy = testing.accuracy_of_model()
+	print "accuracy of the testing data is: " + str(accuracy)
+	
+	#specify what beacon, gateway and timerange you're interested in
+	#filter length=None means no filter
+	#if you put filter=10 for example you will use moving average over 10 seconds
+	# al_walk = MatchedTimestamps()
+	# al_walk.init_from_database('0117C59B07A4', 
+	# 	['EDC36C497B43', 'D78A75B468C2', 'EE5A181D4A27', 'C9827BC63EE9', 'D13DF2E3B7E4', 'EF4DCFA41F7E', 'FF9AE92EE4C9', 'D9DD5DA69F7B', 'CD2DA08685AD'], 
+	# 	datetime(2017, 8, 13, 04, 50, 0, 0), datetime(2017, 8, 13, 04, 53, 0, 0), 
+	# 	filter_length=3)
+	al_walk = MatchedTimestamps()
+	al_walk.init_from_database('0117C59B07A4', 
+		['C9827BC63EE9', 'EF4DCFA41F7E', 'EDC36C497B43', 'EE5A181D4A27', 'D78A75B468C2', 'FF9AE92EE4C9','D13DF2E3B7E4','D9DD5DA69F7B','CD2DA08685AD'], 
+		datetime(2017, 8, 13, 4, 49, 0, 0), datetime(2017, 8, 15, 04, 53, 0, 0), 
+		filter_length=3)	
+
+	al_walk.two_d_plot('testing')
+	al_walk.replace_nan()
+	al_walk = al_walk.remove_nan()
+	al_walk.standardize_testing(scaler)
+	al_walk.two_d_plot('scaled_testing')
+	al_walk.classifier = svm
+	prediction = al_walk.predict()
+	
+	probabilites = al_walk.predict_proba()
+	print probabilites
+	#datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0),
+
+	print prediction
+
+	#prediction = helper_functions.path_rules(prediction, probabilites,labels)
+	
+
+	# probs = pd.DataFrame(probabilites)
+	# print(probs.to_csv(index=False, header=False))
+
+	# preds = pd.DataFrame(prediction)
+	# print(preds.to_csv(index=False, header=False))
