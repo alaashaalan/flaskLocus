@@ -16,6 +16,7 @@ CREATE TABLE classifiers (
 	classifier_name VARCHAR(50),  
 	classifier longblob,
 	gateway_list blob,
+	standardize_scalar blob,
 	PRIMARY KEY (id)
 );
 

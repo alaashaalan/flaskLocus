@@ -64,12 +64,12 @@ def init_classifier():
 	# Process Data into correct form to run SVM
 	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
 	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
-	gateway_list = [whitespace.strip() for whitespace in gateway_id.split(',')]
+	gateway_list = [whitespace.strip() for whitespace in gateway_list.split(',')]
 	filter_window = int(filter_window)
 
 	# Train SVM and check results
-	classifier = classifiers.create_classifier(beacon_id, gateway_list, start_date, end_date, filter_window, classifier_name)
-	db.save_classifier(classifier, classifier_name, gateway_list)
+	classifier, standardize_scalar = classifiers.create_classifier(beacon_id, gateway_list, start_date, end_date, filter_window, classifier_name)
+	db.save_classifier(classifier, classifier_name, gateway_list, standardize_scalar)
 
 	return render_template('use_classifier.html')
 
@@ -92,7 +92,8 @@ def predict_classifier():
 	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
 	filter_window = int(filter_window)
 
-	result = classifiers.use_classifier(beacon_id, start_date, end_date, filter_window, classifier_name, label)
+	results = classifiers.use_classifier(beacon_id, start_date, end_date, filter_window, classifier_name, label)
+	print results
 
 	return str(results)
 
