@@ -43,10 +43,11 @@ def insert_message(message):
 	database.commit()
 	database.close()
 
-def save_classifier(classifier, classifier_name, gateway_list):
+def save_classifier(classifier, classifier_name, gateway_list, standardize_scalar):
 
 	database, cursor = connection()
 	classifier = pickle.dumps(classifier)
+	standardize_scalar = pickle.dumps(standardize_scalar)
 	gateway_list = ','.join(gateway_list)
 
 	# Check if classifier name already exists
@@ -54,15 +55,15 @@ def save_classifier(classifier, classifier_name, gateway_list):
 	cursor.execute(query,[classifier_name])
 	records = cursor.fetchall()
 
-	data = (classifier, classifier_name, gateway_list)
+	data = (classifier, classifier_name, gateway_list, standardize_scalar)
 
 	if len(records) != 0:
 		delete_statement ="DELETE FROM classifiers WHERE classifier_name = {}".format('%s')
 		cursor.execute(delete_statement,[classifier_name])
 
 	insert_statement = (
-		"INSERT INTO classifiers (classifier, classifier_name, gateway_list)"
-		"VALUES (%s, %s, %s)"
+		"INSERT INTO classifiers (classifier, classifier_name, gateway_list, standardize_scalar)"
+		"VALUES (%s, %s, %s, %s)"
 		)
 
 	cursor.execute(insert_statement,data)
@@ -73,16 +74,21 @@ def load_classifier(classifier_name):
 
 	database, cursor = connection()
 
-	query = "SELECT classifier, gateway_list FROM classifiers WHERE classifier_name = {}".format('%s')
+	query = "SELECT classifier, gateway_list, standardize_scalar FROM classifiers WHERE classifier_name = {}".format('%s')
 	cursor.execute(query, [classifier_name])
 	records = cursor.fetchall()
 	records = helper_functions.flatten_2d_struct(records)
+
 	classifier = records[0]
 	gateway_list = records[1]
+	standardize_scalar = records[2]
 	gateway_list = [whitespace.strip() for whitespace in gateway_list.split(',')]
+
 	classifier = pickle.loads(classifier)
+	standardize_scalar = pickle.loads(standardize_scalar)
+	
 	database.close()
-	return classifier, gateway_list
+	return classifier, gateway_list, standardize_scalar
 
 def validate_message(message):
 	message_values = message.split(',')
