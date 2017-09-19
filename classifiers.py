@@ -10,12 +10,10 @@ def create_classifier(beacon_id, gateway_list, start_date, end_date, filter_wind
 	# print processed matched timestamp table
 	training_set.replace_nan()
 	training_set.remove_nan()
-	standardize_scalar = training_set.standardize_training()
+	training_set.standardize_training()
 	training_set.train_SVM()
 
-	classifier = training_set.classifier
-
-	return classifier, standardize_scalar
+	return training_set.classifier, training_set.standardize_scalar
 
 def use_classifier(beacon_id, start_date, end_date, filter_window, classifier_name, label):
 	classifier, gateway_list, standardize_scalar  = db.load_classifier(classifier_name)

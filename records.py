@@ -337,8 +337,6 @@ class MatchedTimestamps:
 	def predict_proba(self):
 		data = np.array(self.data_frame[self.gateway_list])
 		return self.classifier.predict_proba(data)
-
-
 		
 	def train_test_split(self, training_size=0.5, seed=None):
 		gateway_list = self.gateway_list
@@ -392,7 +390,8 @@ class MatchedTimestamps:
 			scaler.append(preprocessing.StandardScaler().fit(self.data_frame[gateway]))
 			scaled = scaler[index].transform(self.data_frame[gateway]) 
 			self.data_frame[gateway] = scaled
-		return scaler
+
+		self.standardize_scalar = scaler
 
 	def standardize_testing(self, scaler):
 		gateway_list=self.gateway_list

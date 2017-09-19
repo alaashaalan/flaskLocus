@@ -78,12 +78,15 @@ def load_classifier(classifier_name):
 	cursor.execute(query, [classifier_name])
 	records = cursor.fetchall()
 	records = helper_functions.flatten_2d_struct(records)
+
 	classifier = records[0]
 	gateway_list = records[1]
 	standardize_scalar = records[2]
 	gateway_list = [whitespace.strip() for whitespace in gateway_list.split(',')]
+
 	classifier = pickle.loads(classifier)
 	standardize_scalar = pickle.loads(standardize_scalar)
+	
 	database.close()
 	return classifier, gateway_list, standardize_scalar
 
