@@ -191,10 +191,12 @@ class ListOfRecords(list):
 
 
 class MatchedTimestamps:
-	def __init__(self, data_frame=None, gateway_list=None, classifier=None):
+	def __init__(self, data_frame=None, gateway_list=None, classifier=None, standardize_scalar=None):
 		self.data_frame = data_frame
 		self.gateway_list = gateway_list
 		self.classifier = classifier
+		self.standardize_scalar = standardize_scalar
+
 
 
 	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=False, label=None):
@@ -332,7 +334,7 @@ class MatchedTimestamps:
 
 	def predict(self):
 		data = np.array(self.data_frame[self.gateway_list])
-		return self.classifier.predict(data)
+		return self.classifier.predict(data).tolist()
 
 	def predict_proba(self):
 		data = np.array(self.data_frame[self.gateway_list])
@@ -421,16 +423,12 @@ class MatchedTimestamps:
 			self.data_frame[gateway] = rssis
 
 
-
-
 	def replace_nan_imputer(self):
 		imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
 		gateway_list=self.gateway_list
 		for gateway in gateway_list:
 			imputed = imp.fit_transform(self.data_frame[gateway])
 			self.data_frame[gateway] = imputed
-
-
 
 
 	def replace_nan(self):
@@ -474,7 +472,13 @@ class MatchedTimestamps:
 				seen.add(item)
 				result.append(item)
 		return result
-			
+
+
+	def get_timestamps(self):
+		timestamp = self.data_frame.index.strftime("%Y-%m-%d %H:%M:%S").tolist()
+		timestamp = [str(date) for date in timestamp]
+		timestamp = [datetime.strptime(date, "%Y-%m-%d %H:%M:%S") for date in timestamp]
+		return timestamp
 
 	def _rename_label(self):
 		matched_timestamps_merged =  copy.deepcopy(self)

@@ -25,4 +25,12 @@ CREATE TABLE app_state (
 	status BOOLEAN, 
 	label VARCHAR(50)
 );
+CREATE TABLE zone_predictions (
+	id INT NOT NULL AUTO_INCREMENT,
+	time_stamp DATETIME(6),
+	beacon_id VARCHAR(50),
+	zone VARCHAR(50),
+	PRIMARY KEY (id)
+
+);
 INSERT INTO app_state (status) VALUES (0);

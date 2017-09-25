@@ -5,7 +5,7 @@ import config
 import numpy as np
 import helper_functions
 import cPickle as pickle
-
+import itertools
 
 # Returns credentials to connect to database
 def connection():
@@ -66,7 +66,7 @@ def save_classifier(classifier, classifier_name, gateway_list, standardize_scala
 		"VALUES (%s, %s, %s, %s)"
 		)
 
-	cursor.execute(insert_statement,data)
+	cursor.executemany(insert_statement,data)
 	database.commit()
 	database.close()
 
@@ -89,6 +89,25 @@ def load_classifier(classifier_name):
 	
 	database.close()
 	return classifier, gateway_list, standardize_scalar
+
+def save_zone_predictions(timestamps, beacon_id, predictions):
+	'''Need to deal with duplicate timestamps in single beacon'''
+	database, cursor = connection()
+	beacon_id = [str(beacon_id) for x in range(len(predictions))]
+
+	insert_statement = (
+		"INSERT INTO zone_predictions (time_stamp, beacon_id, zone)"
+		"VALUES (%s, %s, %s)"
+		)
+	predictions = predictions[:-1]
+	zone_predictions = itertools.izip_longest(timestamps, beacon_id, predictions, fillvalue=None)
+
+	cursor.executemany(insert_statement, zone_predictions)
+	database.commit()
+	database.close()
+
+	if None in zone_predictions:
+		print 'Incomplete records fixed by inserting NULL'
 
 def validate_message(message):
 	message_values = message.split(',')
