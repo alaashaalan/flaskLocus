@@ -126,14 +126,14 @@ def real_time():
 @app.route('/classify', methods=['POST'])
 def classify():
 
-	# start_date = '2017-07-13 19:40:00'
-	# end_date = '2017-07-13 19:40:02'	
+	start_date = '2017-07-13 19:40:00'
+	end_date = '2017-07-13 19:40:02'	
 
-	end_date = datetime.datetime.now()
+	# end_date = datetime.datetime.now()
 	# end_date = end_date + datetime.timedelta(hours=7)  # convert to UTC
-	start_date = end_date - datetime.timedelta(seconds=1)
-	end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
-	start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
+	# start_date = end_date - datetime.timedelta(seconds=1)
+	# end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
+	# start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
 	
 	beacon_id = 1
 	gateway_id = [1,2,3]
