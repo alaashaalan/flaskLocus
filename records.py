@@ -87,6 +87,10 @@ class ListOfRecords(list):
 
 			self.append(record)
 
+		if len(self) == 0:
+			raise ValueError("db doesn't contain records for: ", beacon, gateways, start, end, label)
+
+
 
 	def get_rssis(self):
 		rssis = []
