@@ -38,12 +38,12 @@ class Record:
 		
 		# print record_tuple
 		# raise NotImplementedError
-		self.timestamp = record_tuple[0]  
-		self.tag_id = record_tuple[1]
-		self.gateway_id = record_tuple[2]
-		self.rssi = record_tuple[3]
-		self.raw_packet_content = record_tuple[4] 
-		self.label = record_tuple[5]
+		self.timestamp = record_tuple[1]  
+		self.tag_id = record_tuple[2]
+		self.gateway_id = record_tuple[3]
+		self.rssi = record_tuple[4]
+		self.raw_packet_content = record_tuple[5] 
+		self.label = record_tuple[7]
 		self.ntp = record_tuple[6]
 
 
