@@ -88,7 +88,6 @@ def predict_classifier():
 
 	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
 	end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")	
-	filter_window = int(filter_window)
 
 	results = classifiers.use_classifier(beacon_id, start_date, end_date, classifier_name)
 
