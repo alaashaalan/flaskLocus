@@ -84,8 +84,6 @@ def predict_classifier():
 	start_date = request.form['start_date']
 	end_date = request.form['end_date']
 	beacon_id = request.form['beacon_id']
-	label = request.form['label']
-	filter_window = request.form['filter_window']
 	classifier_name = request.form['classifier_name']
 
 	start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
