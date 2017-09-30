@@ -201,7 +201,7 @@ class MatchedTimestamps:
 		self.classifier = classifier
 
 
-	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=False, label=None):
+	def init_from_database(self, beacon, gateways, start, end, filter_length=3, slope_filter=False, label=None):
 		self.gateway_list = gateways
 		all_data = {}
 		for gateway in gateways:
