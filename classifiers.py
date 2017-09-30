@@ -1,11 +1,10 @@
 import records
 import db
 
-def create_classifier(beacon_id, gateway_list, start_date, end_date, filter_window, classifier_name):
+def create_classifier(beacon_id, gateway_list, start_date, end_date, classifier_name):
 	training_set =  records.MatchedTimestamps()
 
-	training_set.init_from_database(beacon_id, gateway_list, start_date, end_date, 
-		filter_length=filter_window)
+	training_set.init_from_database(beacon_id, gateway_list, start_date, end_date)
 
 	# print processed matched timestamp table
 	training_set.replace_nan()
