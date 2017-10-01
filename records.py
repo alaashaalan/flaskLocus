@@ -67,15 +67,11 @@ class ListOfRecords(list):
 		raise NotImplementedError
 
 
-	def init_from_database(self, beacon, gateway, start, end, label=None):
+	def init_from_database(self, beacon, gateway, start, end):
 		database, cursor = db.connection()
-		# query = "SELECT * FROM test_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
-		if label != None:
-			query = "SELECT * FROM raw_data WHERE tag_id= {} AND label={} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s', '%s')
-			cursor.execute(query, [beacon, label, gateway, start, end])
-		else:
-			query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
-			cursor.execute(query, [beacon, gateway, start, end])
+
+		query = "SELECT * FROM raw_data WHERE tag_id = {} AND gateway_id = {} AND time_stamp >= {} AND time_stamp <= {}".format('%s', '%s', '%s', '%s')
+		cursor.execute(query, [beacon, gateway, start, end])
 		
 		records = cursor.fetchall()
 		database.close()
@@ -88,7 +84,7 @@ class ListOfRecords(list):
 			self.append(record)
 
 		if len(self) == 0:
-			raise ValueError("db doesn't contain records for: ", beacon, gateway, start, end, label)
+			raise ValueError("db doesn't contain records for: ", beacon, gateway, start, end)
 
 
 
@@ -201,13 +197,13 @@ class MatchedTimestamps:
 		self.classifier = classifier
 
 
-	def init_from_database(self, beacon, gateways, start, end, filter_length=3, slope_filter=False, label=None):
+	def init_from_database(self, beacon, gateways, start, end, filter_length=3, slope_filter=False):
 		self.gateway_list = gateways
 		all_data = {}
 		for gateway in gateways:
 			records = ListOfRecords()
 
-			records.init_from_database(beacon, gateway, start, end, label)
+			records.init_from_database(beacon, gateway, start, end)
 			if slope_filter:
 				records = records.slope_filter() 
 			if filter_length is not None:
