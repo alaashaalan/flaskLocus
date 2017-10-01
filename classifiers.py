@@ -29,4 +29,6 @@ def use_classifier(beacon_id, start_date, end_date, classifier_name):
 	timestamps = predicting_set.get_timestamps()
 	db.save_zone_predictions(timestamps, beacon_id, predictions)
 
-	return predictions
+	return zip(timestamps, predictions)
+
+
