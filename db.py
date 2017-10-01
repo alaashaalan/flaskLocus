@@ -66,7 +66,7 @@ def save_classifier(classifier, classifier_name, gateway_list, standardize_scala
 		"VALUES (%s, %s, %s, %s)"
 		)
 
-	cursor.executemany(insert_statement,data)
+	cursor.execute(insert_statement,data)
 	database.commit()
 	database.close()
 
