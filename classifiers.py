@@ -1,11 +1,10 @@
 import records
 import db
 
-def create_classifier(beacon_id, gateway_list, start_date, end_date, filter_window, classifier_name):
+def create_classifier(beacon_id, gateway_list, start_date, end_date, classifier_name):
 	training_set =  records.MatchedTimestamps()
 
-	training_set.init_from_database(beacon_id, gateway_list, start_date, end_date, 
-		filter_length=filter_window)
+	training_set.init_from_database(beacon_id, gateway_list, start_date, end_date)
 
 	# print processed matched timestamp table
 	training_set.replace_nan()
@@ -15,13 +14,12 @@ def create_classifier(beacon_id, gateway_list, start_date, end_date, filter_wind
 
 	return training_set.classifier, training_set.standardize_scalar
 
-def use_classifier(beacon_id, start_date, end_date, filter_window, classifier_name, label):
+def use_classifier(beacon_id, start_date, end_date, classifier_name):
 
 	classifier, gateway_list, standardize_scalar  = db.load_classifier(classifier_name)
 	
 	predicting_set = records.MatchedTimestamps()
-	predicting_set.init_from_database(beacon_id, gateway_list, start_date, end_date, 
-		filter_length=filter_window, label=label)
+	predicting_set.init_from_database(beacon_id, gateway_list, start_date, end_date)
 	predicting_set.classifier = classifier
 	predicting_set.replace_nan()
 	predicting_set.remove_nan()
@@ -31,4 +29,6 @@ def use_classifier(beacon_id, start_date, end_date, filter_window, classifier_na
 	timestamps = predicting_set.get_timestamps()
 	db.save_zone_predictions(timestamps, beacon_id, predictions)
 
-	return predictions
+	return zip(timestamps, predictions)
+
+

@@ -10,6 +10,7 @@ CREATE TABLE raw_data (
 	label VARCHAR(100),
 	PRIMARY KEY (id)
 );
+
 DROP TABLE if exists classifiers;
 CREATE TABLE classifiers (
 	id INT NOT NULL AUTO_INCREMENT,
