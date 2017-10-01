@@ -99,8 +99,8 @@ def save_zone_predictions(timestamps, beacon_id, predictions):
 		"INSERT INTO zone_predictions (time_stamp, beacon_id, zone)"
 		"VALUES (%s, %s, %s)"
 		)
-	predictions = predictions[:-1]
-	zone_predictions = itertools.izip_longest(timestamps, beacon_id, predictions, fillvalue=None)
+	
+	zone_predictions = zip(timestamps, beacon_id, predictions)
 
 	cursor.executemany(insert_statement, zone_predictions)
 	database.commit()
