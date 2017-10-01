@@ -16,6 +16,7 @@ def create_classifier(beacon_id, gateway_list, start_date, end_date, filter_wind
 	return training_set.classifier, training_set.standardize_scalar
 
 def use_classifier(beacon_id, start_date, end_date, filter_window, classifier_name, label):
+
 	classifier, gateway_list, standardize_scalar  = db.load_classifier(classifier_name)
 	
 	predicting_set = records.MatchedTimestamps()
@@ -25,6 +26,9 @@ def use_classifier(beacon_id, start_date, end_date, filter_window, classifier_na
 	predicting_set.replace_nan()
 	predicting_set.remove_nan()
 	predicting_set.standardize_testing(standardize_scalar)
-	prediction = predicting_set.predict()
 
-	return prediction
+	predictions = predicting_set.predict()
+	timestamps = predicting_set.get_timestamps()
+	db.save_zone_predictions(timestamps, beacon_id, predictions)
+
+	return predictions
