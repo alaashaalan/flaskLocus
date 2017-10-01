@@ -195,8 +195,6 @@ class MatchedTimestamps:
 		self.data_frame = data_frame
 		self.gateway_list = gateway_list
 		self.classifier = classifier
-		self.standardize_scalar = standardize_scalar
-
 
 
 	def init_from_database(self, beacon, gateways, start, end, filter_length=None, slope_filter=False, label=None):
@@ -475,10 +473,9 @@ class MatchedTimestamps:
 
 
 	def get_timestamps(self):
-		timestamp = self.data_frame.index.strftime("%Y-%m-%d %H:%M:%S").tolist()
-		timestamp = [str(date) for date in timestamp]
-		timestamp = [datetime.strptime(date, "%Y-%m-%d %H:%M:%S") for date in timestamp]
-		return timestamp
+		timestamps = self.data_frame.index.strftime("%Y-%m-%d %H:%M:%S").tolist()
+		timestamps = [datetime.strptime(date, "%Y-%m-%d %H:%M:%S") for date in timestamps]
+		return timestamps
 
 	def _rename_label(self):
 		matched_timestamps_merged =  copy.deepcopy(self)
