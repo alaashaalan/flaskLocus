@@ -12,7 +12,6 @@ CREATE TABLE raw_data (
 );
 
 DROP TABLE if exists classifiers;
-DROP TABLE if exists classifiers;
 CREATE TABLE classifiers (
 	id INT NOT NULL AUTO_INCREMENT,
 	classifier_name VARCHAR(50),  
