@@ -101,26 +101,32 @@ def onclick(event):
     ix, iy = event.xdata, event.ydata
     print 'x = %d, y = %d'%(
         ix, iy)
-    global coords
+    global verts, coords
     coords.append((ix,iy))
     if (number_of_clicks == 4): 
         number_of_clicks = 0
         verts.append(coords)
         coords = []
-    return coords
+    #len should be # of polys
+    if len(verts) ==zones: 
+    	fig.canvas.mpl_disconnect(cid)
+    	plt.close()
+    return 
 
 def get_polys(number_of_zones, new_zones=False):
 	if (new_zones == False):
-		verts = 0
-	return verts
+		return verts
+	global fig
+	global cid
+	global zones
+	zones = number_of_zones
 
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 	img = imread("992.png")
 	ax.imshow(img, zorder=0)
-
 	for i in xrange(0,1):
-		cid = fig.canvas.mpl_connect('button_press_event', onclick)
+		cid= fig.canvas.mpl_connect('button_press_event', onclick)
 	plt.show()
 	return verts
 
