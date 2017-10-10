@@ -14,13 +14,16 @@ from sklearn.preprocessing import Imputer
 
 import matplotlib.pyplot as plt
 #from mpl_toolkits.mplot3d import Axes3D
-
+from matplotlib.collections import PolyCollection
+import matplotlib as mpl
 
 import db
 import helper_functions
 import optimization_trilateration
 import locus
 import itertools
+import seaborn as sns
+from scipy.misc import imread
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -487,7 +490,49 @@ class MatchedTimestamps:
 	def __repr__(self):
 
 		return self.data_frame.__repr__()
-		
+
+def basic_heatmap(self): 
+	database, cursor = db.connection()
+	df = pd.read_sql('SELECT * FROM predictions', con=database)
+	# Create a list of unique values by turning the
+	# pandas column into a set
+	#unique_locations = pd.unique(df[['location_id']].values.ravel())
+	freq = df.groupby('location_id').agg({'timestamp': len}).rename(columns={'timestamp':'frequency'})
+	print (freq)
+
+	Index = ['1', '2', '3', '4', '5']
+	Cols = ['A', 'B', 'C']
+	data = freq['frequency'].values
+	data = data.reshape(5,3)
+	hmap = pd.DataFrame(data, index=Index, columns=Cols)
+	sns.heatmap(hmap,annot=True, cmap='plt.cm.hot')
+
+def store_heatmap(self): 
+	database, cursor = db.connection()
+	df = pd.read_sql('SELECT * FROM predictions', con=database)
+	#get all unique locations, sort by #s then alpha. 
+	unique_locations = pd.unique(df[['location_id']].values.ravel())
+	unique_locations = np.sort(unique_locations)
+	freq = df.groupby('location_id').agg({'timestamp': len}).rename(columns={'timestamp':'frequency'})
+	# frequencies sorted by #s then alpha
+	data = freq['frequency'].values
+	color=[]
+	for index in range(0,(len(data))):
+		color.append(cm.hot(data[index]))
+
+	#convert each location to shape and coordinate for zone. 
+	coll = PolyCollection(verts,facecolors=color, edgecolors='none')
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	img = imread("992.png")
+	ax.add_collection(coll)
+	#plot background w/ zorder=0
+	ax.imshow(img)
+	# add a color bar
+	#fig.colorbar(coll, ax=ax)
+	#ax.autoscale_view()
+	plt.show()
+
 if __name__ == "__main__":
 	pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -559,6 +604,7 @@ if __name__ == "__main__":
 
 	print prediction
 
+
 	#prediction = helper_functions.path_rules(prediction, probabilites,labels)
 	
 
@@ -567,3 +613,6 @@ if __name__ == "__main__":
 
 	# preds = pd.DataFrame(prediction)
 	# print(preds.to_csv(index=False, header=False))
+
+	vert = helper_functions.get_polys(2)
+	print vert

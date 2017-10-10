@@ -2,8 +2,15 @@ from __future__ import division
 import math
 import db
 import datetime
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.collections import PolyCollection
+from scipy.misc import imread
 
 RSSI_1M = -60
+number_of_clicks = 0
+verts = []
+coords = []
 
 def rssi_to_meter(rssi): #code works but will need some modification based what type of string we pass it
 	RSSI_1m = RSSI_1M  #this value is experimentally measured
@@ -87,3 +94,36 @@ def path_rules(prediction, probabilities, positions):
 # Accepts 2D lists or tuples and flattens them into the corresponding structure
 def flatten_2d_struct(struct_2d):
 	return [element for struct_1d in struct_2d for element in struct_1d]
+
+def onclick(event):
+    global ix, iy, number_of_clicks
+    number_of_clicks = number_of_clicks +1
+    ix, iy = event.xdata, event.ydata
+    print 'x = %d, y = %d'%(
+        ix, iy)
+    global coords
+    coords.append((ix,iy))
+    if (number_of_clicks == 4): 
+        number_of_clicks = 0
+        verts.append(coords)
+        coords = []
+    return coords
+
+def get_polys(number_of_zones, new_zones=False):
+	if (new_zones == False):
+		verts = 0
+	return verts
+
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	img = imread("992.png")
+	ax.imshow(img, zorder=0)
+
+	for i in xrange(0,1):
+		cid = fig.canvas.mpl_connect('button_press_event', onclick)
+	plt.show()
+	return verts
+
+
+
+
