@@ -8,22 +8,25 @@ from sklearn import svm
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedShuffleSplit
-
 from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
 
+
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 #from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.collections import PolyCollection
 import matplotlib as mpl
 
+import classifiers
 import db
 import helper_functions
 import optimization_trilateration
 import locus
 import itertools
-import seaborn as sns
+import seaborn as sns; sns.set()
 from scipy.misc import imread
+
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -46,8 +49,8 @@ class Record:
 		self.gateway_id = record_tuple[3]
 		self.rssi = record_tuple[4]
 		self.raw_packet_content = record_tuple[5] 
-		self.label = record_tuple[7]
-		self.ntp = record_tuple[6]
+		self.label = record_tuple[6]
+		self.ntp = record_tuple[7]
 
 
 	def belongs_to_time_range(self, start, end):
@@ -491,36 +494,38 @@ class MatchedTimestamps:
 
 		return self.data_frame.__repr__()
 
-def basic_heatmap(self): 
+def basic_heatmap(): 
 	database, cursor = db.connection()
-	df = pd.read_sql('SELECT * FROM predictions', con=database)
+	df = pd.read_sql('SELECT * FROM zone_predictions', con=database)
 	# Create a list of unique values by turning the
 	# pandas column into a set
-	#unique_locations = pd.unique(df[['location_id']].values.ravel())
-	freq = df.groupby('location_id').agg({'timestamp': len}).rename(columns={'timestamp':'frequency'})
+	#unique_locations = pd.unique(df[['zone']].values.ravel())
+	freq = df.groupby('zone').agg({'beacon_id': len}).rename(columns={'beacon_id':'frequency'})
 	print (freq)
 
-	Index = ['1', '2', '3', '4', '5']
-	Cols = ['A', 'B', 'C']
+	Index = ['1', '2', '3', '4']
+	Cols = ['A', 'B']
 	data = freq['frequency'].values
 	#reshape number of index by number of cols
-	data = data.reshape(5,3)
+	data = data.reshape(4,2)
 	hmap = pd.DataFrame(data, index=Index, columns=Cols)
-	sns.heatmap(hmap,annot=True, cmap='plt.cm.hot')
+	sns.heatmap(hmap,annot=True)
 
-def store_heatmap(self): 
+def store_heatmap(numb_of_zones, new_zones): 
 	database, cursor = db.connection()
-	df = pd.read_sql('SELECT * FROM predictions', con=database)
+	df = pd.read_sql('SELECT * FROM zone_predictions', con=database)
 	#get all unique locations, sort by #s then alpha. 
-	unique_locations = pd.unique(df[['location_id']].values.ravel())
+	unique_locations = pd.unique(df[['zone']].values.ravel())
 	unique_locations = np.sort(unique_locations)
-	freq = df.groupby('location_id').agg({'timestamp': len}).rename(columns={'timestamp':'frequency'})
+	freq = df.groupby('zone').agg({'beacon_id': len}).rename(columns={'beacon_id':'frequency'})
 	# frequencies sorted by #s then alpha
 	data = freq['frequency'].values
-	color=[]
-	for index in range(0,(len(data))):
-		color.append(cm.hot(data[index]))
-
+	print data
+	max_freq = max(data) + 10
+	min_freq = min(data) - 10
+	norm = plt.Normalize(vmin = min_freq, vmax = max_freq)
+	color = plt.cm.hot(norm(data))
+	verts = helper_functions.get_polys(numb_of_zones, new_zones)
 	#convert each location to shape and coordinate for zone. 
 	coll = PolyCollection(verts,facecolors=color, edgecolors='none')
 	fig = plt.figure()
@@ -530,12 +535,37 @@ def store_heatmap(self):
 	#plot background w/ zorder=0
 	ax.imshow(img)
 	# add a color bar
-	#fig.colorbar(coll, ax=ax)
+	m = cm.ScalarMappable(cmap=cm.hot)
+	m.set_array(data)
+	plt.colorbar(m)
+	cur_axes = plt.gca()
+	cur_axes.get_xaxis().set_visible(False)
+	cur_axes.get_yaxis().set_visible(False)
+
 	#ax.autoscale_view()
 	plt.show()
 
 if __name__ == "__main__":
-	pd.options.mode.chained_assignment = None  # default='warn'
+	# pd.options.mode.chained_assignment = None  # default='warn'
+
+	# beacon_id = "0117C59B07A4"
+	# gateway_list = ['C9827BC63EE9', 'EF4DCFA41F7E', 'EDC36C497B43', 'EE5A181D4A27', 'D78A75B468C2', 'FF9AE92EE4C9','D13DF2E3B7E4','D9DD5DA69F7B','CD2DA08685AD']
+	# start_date = datetime(2016, 8, 13, 4, 27, 0, 0)
+	# end_date = datetime(2017, 8, 13, 4, 49, 0, 0)
+	# classifier_name = "test"
+
+	# classifier, scalar = classifiers.create_classifier(beacon_id, gateway_list, start_date, end_date, classifier_name)
+	# db.save_classifier(classifier, classifier_name, gateway_list, scalar)
+
+	# start_date = datetime(2017, 8, 13, 4, 49, 0, 0)
+	# end_date = datetime(2017, 8, 15, 04, 53, 0, 0)
+	# predictions = classifiers.use_classifier(beacon_id, start_date, end_date, classifier_name)
+	
+	store_heatmap(8,False)
+
+
+
+#above is what i'm using
 
 	# matched_timestamps =  MatchedTimestamps()
 
@@ -605,10 +635,6 @@ if __name__ == "__main__":
 	# #datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0),
 
 	# print prediction
-
-	vert = helper_functions.get_polys(2, new_zones=True)
-	print vert
-
 	#prediction = helper_functions.path_rules(prediction, probabilites,labels)
 	
 
