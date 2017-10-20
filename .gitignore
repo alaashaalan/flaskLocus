@@ -3,3 +3,4 @@ config.py
 log
 *.db
 .DS_Store
+project_env/*
