@@ -75,8 +75,8 @@ def get_polygons(map_image, number_of_zones, new_zones=False):
 def store_heatmap(beacon_id, start_date, end_date, file_name=None, map_image=MAP_IMAGE, polygons=ALL_POLYGONS): 
 	database, cursor = db.connection()
 
+	# TODO: MAJOR THREAT!!!
 	query = "SELECT * FROM zone_predictions where beacon_id='{}' and time_stamp>='{}' and time_stamp<='{}'".format(beacon_id, start_date, end_date)
-	print query
 
 	df = pd.read_sql(query, con=database)
 
