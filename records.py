@@ -8,19 +8,21 @@ from sklearn import svm
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedShuffleSplit
-
 from sklearn import preprocessing
 from sklearn.preprocessing import Imputer
+
 
 import matplotlib.pyplot as plt
 #from mpl_toolkits.mplot3d import Axes3D
 
 
+import classifiers
 import db
 import helper_functions
 import optimization_trilateration
-import locus
+
 import itertools
+
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -43,8 +45,8 @@ class Record:
 		self.gateway_id = record_tuple[3]
 		self.rssi = record_tuple[4]
 		self.raw_packet_content = record_tuple[5] 
-		self.label = record_tuple[7]
 		self.ntp = record_tuple[6]
+		self.label = record_tuple[7]
 
 
 	def belongs_to_time_range(self, start, end):
@@ -454,8 +456,8 @@ class MatchedTimestamps:
 					rssis[row] = (last_value + next_value)/2
 					#print rssis[row]
 			self.data_frame[gateway] = rssis
-			if np.isnan(rssis[row+1]):
-				rssis[row+1] = rssis[row]
+			if np.isnan(rssis[-1]):
+				rssis[-1] = rssis[-2]
 			#print rssis
 		print "replaced",numb_of_nan,"elements containing NaN" 
 
@@ -487,83 +489,104 @@ class MatchedTimestamps:
 	def __repr__(self):
 
 		return self.data_frame.__repr__()
-		
+
+
+
 if __name__ == "__main__":
-	pd.options.mode.chained_assignment = None  # default='warn'
+	pass
+	# pd.options.mode.chained_assignment = None  # default='warn'
 
-	matched_timestamps =  MatchedTimestamps()
+	# beacon_id = "0117C59B07A4"
+	# gateway_list = ['C9827BC63EE9', 'EF4DCFA41F7E', 'EDC36C497B43', 'EE5A181D4A27', 'D78A75B468C2', 'FF9AE92EE4C9','D13DF2E3B7E4','D9DD5DA69F7B','CD2DA08685AD']
+	# start_date = datetime(2016, 8, 13, 4, 27, 0, 0)
+	# end_date = datetime(2017, 8, 13, 4, 49, 0, 0)
+	# classifier_name = "test"
 
-	# specify what beacon, gateway and timerange you're interested in
-	# filter length=None means no filter
-	# if you put filter=10 for example you will use moving average over 10 seconds
-	matched_timestamps.init_from_database('0117C59B07A4', 
-		['C9827BC63EE9', 'EF4DCFA41F7E', 'EDC36C497B43', 'EE5A181D4A27', 'D78A75B468C2', 'FF9AE92EE4C9','D13DF2E3B7E4','D9DD5DA69F7B','CD2DA08685AD'], 
-		datetime(2016, 6, 29, 22, 00, 18, 0), datetime(2017, 8, 13, 4, 49, 0, 0), 
-		filter_length=3, slope_filter = True)
+	# classifier, scalar = classifiers.create_classifier(beacon_id, gateway_list, start_date, end_date, classifier_name)
+	# db.save_classifier(classifier, classifier_name, gateway_list, scalar)
 
-
-
-
-	matched_timestamps.two_d_plot('Training Data')
-	matched_timestamps.replace_nan()
-	matched_timestamps = matched_timestamps.remove_nan()
-	scaler = matched_timestamps.standardize_training()
-	matched_timestamps.two_d_plot('Standardized Training Data')
-
-	# split the entire datasat into training and testing
-	training, testing = matched_timestamps.train_test_split(training_size=0.5, seed=None)
-
-	labels = matched_timestamps.get_labels()
-	# create a classfier using the trainging dataset
-	svm = training.train_SVM()
+	# start_date = datetime(2017, 8, 13, 4, 49, 0, 0)
+	# end_date = datetime(2017, 8, 15, 04, 53, 0, 0)
+	# predictions = classifiers.use_classifier(beacon_id, start_date, end_date, classifier_name)
 
 
 
-	# check accuracy of the training dataset with training classifier
-	accuracy = training.accuracy_of_model()
-	print "accuracy of the training data is: " + str(accuracy)
 
 
-	# assigin the classifier to the testing dataset
-	testing.classifier = svm
-	
-	# check accuracy of the testing dataset with training classifier
-	accuracy = testing.accuracy_of_model()
-	print "accuracy of the testing data is: " + str(accuracy)
-	
-	#specify what beacon, gateway and timerange you're interested in
-	#filter length=None means no filter
-	#if you put filter=10 for example you will use moving average over 10 seconds
+	#above is what i'm using
+
+	# matched_timestamps =  MatchedTimestamps()
+
+	# # specify what beacon, gateway and timerange you're interested in
+	# # filter length=None means no filter
+	# # if you put filter=10 for example you will use moving average over 10 seconds
+	# matched_timestamps.init_from_database('0117C59B07A4', 
+	# 	['C9827BC63EE9', 'EF4DCFA41F7E', 'EDC36C497B43', 'EE5A181D4A27', 'D78A75B468C2', 'FF9AE92EE4C9','D13DF2E3B7E4','D9DD5DA69F7B','CD2DA08685AD'], 
+	# 	datetime(2016, 6, 29, 22, 00, 18, 0), datetime(2017, 8, 13, 4, 49, 0, 0), 
+	# 	filter_length=3, slope_filter = True)
+
+
+
+
+	# matched_timestamps.two_d_plot('Training Data')
+	# matched_timestamps.replace_nan()
+	# matched_timestamps = matched_timestamps.remove_nan()
+	# matched_timestamps.standardize_training()
+	# scaler = matched_timestamps.standardize_scalar
+	# matched_timestamps.two_d_plot('Standardized Training Data')
+
+	# # split the entire datasat into training and testing
+	# training, testing = matched_timestamps.train_test_split(training_size=0.5, seed=None)
+
+	# labels = matched_timestamps.get_labels()
+	# # create a classfier using the trainging dataset
+	# svm = training.train_SVM()
+
+
+
+	# # check accuracy of the training dataset with training classifier
+	# accuracy = training.accuracy_of_classifier()
+	# print "accuracy of the training data is: " + str(accuracy)
+
+
+	# # assigin the classifier to the testing dataset
+	# testing.classifier = svm
+
+	# # check accuracy of the testing dataset with training classifier
+	# accuracy = testing.accuracy_of_classifier()
+	# print "accuracy of the testing data is: " + str(accuracy)
+
+	# #specify what beacon, gateway and timerange you're interested in
+	# #filter length=None means no filter
+	# #if you put filter=10 for example you will use moving average over 10 seconds
+	# # al_walk = MatchedTimestamps()
+	# # al_walk.init_from_database('0117C59B07A4', 
+	# # 	['EDC36C497B43', 'D78A75B468C2', 'EE5A181D4A27', 'C9827BC63EE9', 'D13DF2E3B7E4', 'EF4DCFA41F7E', 'FF9AE92EE4C9', 'D9DD5DA69F7B', 'CD2DA08685AD'], 
+	# # 	datetime(2017, 8, 13, 04, 50, 0, 0), datetime(2017, 8, 13, 04, 53, 0, 0), 
+	# # 	filter_length=3)
 	# al_walk = MatchedTimestamps()
 	# al_walk.init_from_database('0117C59B07A4', 
-	# 	['EDC36C497B43', 'D78A75B468C2', 'EE5A181D4A27', 'C9827BC63EE9', 'D13DF2E3B7E4', 'EF4DCFA41F7E', 'FF9AE92EE4C9', 'D9DD5DA69F7B', 'CD2DA08685AD'], 
-	# 	datetime(2017, 8, 13, 04, 50, 0, 0), datetime(2017, 8, 13, 04, 53, 0, 0), 
-	# 	filter_length=3)
-	al_walk = MatchedTimestamps()
-	al_walk.init_from_database('0117C59B07A4', 
-		['C9827BC63EE9', 'EF4DCFA41F7E', 'EDC36C497B43', 'EE5A181D4A27', 'D78A75B468C2', 'FF9AE92EE4C9','D13DF2E3B7E4','D9DD5DA69F7B','CD2DA08685AD'], 
-		datetime(2017, 8, 13, 4, 49, 0, 0), datetime(2017, 8, 15, 04, 53, 0, 0), 
-		filter_length=3)	
+	# 	['C9827BC63EE9', 'EF4DCFA41F7E', 'EDC36C497B43', 'EE5A181D4A27', 'D78A75B468C2', 'FF9AE92EE4C9','D13DF2E3B7E4','D9DD5DA69F7B','CD2DA08685AD'], 
+	# 	datetime(2017, 8, 13, 4, 49, 0, 0), datetime(2017, 8, 15, 04, 53, 0, 0), 
+	# 	filter_length=3)	
 
-	al_walk.two_d_plot('testing')
-	al_walk.replace_nan()
-	al_walk = al_walk.remove_nan()
-	al_walk.standardize_testing(scaler)
-	al_walk.two_d_plot('scaled_testing')
-	al_walk.classifier = svm
-	prediction = al_walk.predict()
-	
-	probabilites = al_walk.predict_proba()
-	print probabilites
-	#datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0),
+	# al_walk.two_d_plot('testing')
+	# al_walk.replace_nan()
+	# al_walk = al_walk.remove_nan()
+	# al_walk.standardize_testing(scaler)
+	# al_walk.two_d_plot('scaled_testing')
+	# al_walk.classifier = svm
+	# prediction = al_walk.predict()
 
-	print prediction
+	# probabilites = al_walk.predict_proba()
+	# print probabilites
+	# #datetime(2017, 7, 11, 21, 12, 0, 0), datetime(2017, 7, 11, 21, 15, 28, 0),
 
+	# print prediction
 	#prediction = helper_functions.path_rules(prediction, probabilites,labels)
-	
+
 
 	# probs = pd.DataFrame(probabilites)
 	# print(probs.to_csv(index=False, header=False))
 
 	# preds = pd.DataFrame(prediction)
-	# print(preds.to_csv(index=False, header=False))
