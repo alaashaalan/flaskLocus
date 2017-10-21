@@ -1,16 +1,7 @@
 from __future__ import division
 import math
-import db
-import datetime
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.collections import PolyCollection
-from scipy.misc import imread
 
 RSSI_1M = -60
-number_of_clicks = 0
-verts = []
-coords = []
 
 def rssi_to_meter(rssi): #code works but will need some modification based what type of string we pass it
 	RSSI_1m = RSSI_1M  #this value is experimentally measured
@@ -95,50 +86,7 @@ def path_rules(prediction, probabilities, positions):
 def flatten_2d_struct(struct_2d):
 	return [element for struct_1d in struct_2d for element in struct_1d]
 
-def onclick(event):
-    global ix, iy, number_of_clicks
-    number_of_clicks = number_of_clicks +1
-    ix, iy = event.xdata, event.ydata
-    print 'x = %d, y = %d'%(
-        ix, iy)
-    global verts, coords
-    coords.append((ix,iy))
-    if (number_of_clicks == 4): 
-        number_of_clicks = 0
-        verts.append(coords)
-        coords = []
-    #len should be # of polys
-    if len(verts) ==zones: 
-    	fig.canvas.mpl_disconnect(cid)
-    	plt.close()
-    return 
 
-def get_polys(number_of_zones, new_zones=False):
-	if (new_zones == False):
-		all_verts =[[(1606.5517015706805, 1107.9587696335079), (1603.8520942408372, 935.1839005235604), (1660.5438481675392, 935.1839005235604), (1657.8442408376959, 1105.2591623036651)], 
-				[(1609.2513089005233, 916.28664921465986), (1609.2513089005233, 721.91492146596875), (1660.5438481675392, 721.91492146596875), (1660.5438481675392, 916.28664921465986)], 
-				[(1606.5517015706805, 697.61845549738246), (1606.5517015706805, 514.04515706806296), (1663.243455497382, 514.04515706806296), (1665.9430628272248, 692.21924083769659)], 
-				[(1611.9509162303661, 489.74869109947667), (1609.2513089005233, 314.27421465968609), (1663.243455497382, 314.27421465968609), (1663.243455497382, 495.14790575916254)], 
-				[(1709.1367801047118, 1102.5595549738221), (1703.7375654450261, 935.1839005235604), (1760.4293193717276, 935.1839005235604), (1760.4293193717276, 1105.2591623036651)], 
-				[(1709.1367801047118, 910.88743455497399), (1706.4371727748689, 716.51570680628288), (1755.0301047120415, 716.51570680628288), (1760.4293193717276, 910.88743455497399)], 
-				[(1703.7375654450261, 694.91884816753941), (1706.4371727748689, 511.34554973822014), (1757.7297120418843, 514.04515706806296), (1760.4293193717276, 692.21924083769659)], 
-				[(1709.1367801047118, 484.34947643979081), (1709.1367801047118, 319.67342931937196), (1765.8285340314133, 316.97382198952914), (1763.1289267015704, 492.44829842931949)]]
-		for i in range(number_of_zones):
-			verts.append(all_verts[i])
-		return verts
-	global fig
-	global cid
-	global zones
-	zones = number_of_zones
-
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	img = imread("992.png")
-	ax.imshow(img, zorder=0)
-	for i in xrange(0,1):
-		cid= fig.canvas.mpl_connect('button_press_event', onclick)
-	plt.show()
-	return verts
 
 
 

@@ -1,10 +1,12 @@
-from flask import Flask, request, render_template, url_for, redirect
+from flask import Flask, request, render_template, url_for, redirect, send_file
 import helper_functions
 import db
 import datetime
 import celery_app
 from config import celery_config
 import classifiers
+
+import heatmap
 
 app = Flask(__name__)
 
@@ -89,7 +91,12 @@ def predict_classifier():
 
 	results = classifiers.use_classifier(beacon_id, start_date, end_date, classifier_name)
 
-	return str(results)
+	file_name = 'static/test.jpg'
+	heatmap.store_heatmap(beacon_id, start_date, end_date, file_name)
+	return send_file('static/test.jpg')
+
+
+
 
 
 @app.route('/timestamp_matching' , methods=[ 'GET']) 
