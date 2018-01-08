@@ -4,7 +4,7 @@ def credentials():
 
 	host="localhost"
 	user="root"
-	passwd="12345"
+	passwd=""
 	db="locus_development"
 
 	db_credentials = {

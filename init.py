@@ -10,8 +10,8 @@ import heatmap
 
 app = Flask(__name__)
 
-celery_config(app)
-celery = celery_app.make_celery(app)
+# celery_config(app)
+# celery = celery_app.make_celery(app)
 
 
 @app.route('/', methods=['GET','POST']) 
