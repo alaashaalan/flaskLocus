@@ -3,6 +3,8 @@
 # SSH into server
 `ssh -i locus.pem ubuntu@52.91.226.215`
 
+tail the log `tail -f /var/log/nginx/access.log`
+
 # Running the flask application
 for debug mode: `export FLASK_DEBUG=1`
 1. In /flaskLocus: `export FLASK_APP=init.py`
